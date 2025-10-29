@@ -152,7 +152,7 @@ func TestApiSpi(t *testing.T) {
 	var (
 		err       error
 		libPath   = "../dependencies/libs"
-		frontAddr = "tcp://212.64.26.127:31121"
+		frontAddr = "tcp://172.16.200.105:30010"
 		flowPath  = "./flow/"
 	)
 
@@ -163,8 +163,12 @@ func TestApiSpi(t *testing.T) {
 		libPath = filepath.Join(libPath, "rmdapi.dll")
 	}
 
+	t.Log(libPath)
+
 	if info, err := os.Stat(flowPath); err != nil {
-		t.Fatal(err)
+		if err = os.MkdirAll(flowPath, os.ModePerm); err != nil {
+			t.Fatal("make flow path failed")
+		}
 	} else if !info.IsDir() {
 		t.Fatalf("flow path not dir: %s", flowPath)
 	}
