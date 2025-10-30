@@ -202,18 +202,34 @@ func TestApiSpi(t *testing.T) {
 		Password: "test",
 	}); err != nil {
 		t.Fatalf("req login failed: %+v", err)
-	} else {
-		<-api.wait
 	}
+	<-api.wait
 
-	api.ReqBtSubMarketData(&rmd4go.CRsaFtdcBtSubMarketDataField{
+	if err := api.ReqBtSubMarketData(&rmd4go.CRsaFtdcBtSubMarketDataField{
 		ExchangeID:   "CFFEX",
 		InstrumentID: "IC2512",
+		BarPreces:    rmd4go.BarPrecesMinute,
+		BarPeriod:    1,
 	}, &rmd4go.CRsaFtdcBtSubMarketDataField{
 		ExchangeID:   "CFFEX",
 		InstrumentID: "IM2512",
-	})
+	}); err != nil {
+		t.Fatal(err)
+	}
 	<-api.wait
 
-	<-time.After(time.Second * 20)
+	if data, err := api.ReqQryBarMarketData(&rmd4go.CRsaFtdcBtSubMarketDataField{
+		ExchangeID:   "CFFEX",
+		InstrumentID: "IC2512",
+		BarPreces:    rmd4go.BarPrecesMinute,
+		BarPeriod:    1,
+	}, 1000); err != nil {
+		t.Fatal(err)
+	} else {
+		for _, b := range data {
+			t.Logf("%+v", b)
+		}
+
+		t.Log("count", len(data))
+	}
 }

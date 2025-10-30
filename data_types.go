@@ -1359,7 +1359,14 @@ const Rsa_FTDC_BP_Minute uint8 = '1'
 // 日
 const Rsa_FTDC_BP_Day uint8 = '2'
 
+//go:generate stringer -type=TRsaFtdcBarPrecesType -linecomment
 type TRsaFtdcBarPrecesType uint8
+
+const (
+	BarPrecesSecond TRsaFtdcBarPrecesType = TRsaFtdcBarPrecesType(Rsa_FTDC_BP_Second) // 秒
+	BarPrecesMinute TRsaFtdcBarPrecesType = TRsaFtdcBarPrecesType(Rsa_FTDC_BP_Minute) // 分
+	BarPrecesDay    TRsaFtdcBarPrecesType = TRsaFtdcBarPrecesType(Rsa_FTDC_BP_Day)    // 日
+)
 
 // TFtdcOpenCloseMethodType是一个开平方式类型
 // 自动

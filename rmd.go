@@ -114,6 +114,7 @@ var (
 )
 
 func GetTick() *CRsaFtdcDepthMarketDataField {
+	count := 0
 	for {
 		if data := tickPool.Get(); data != nil {
 			runtime.SetFinalizer(data, func(v any) {
@@ -122,6 +123,22 @@ func GetTick() *CRsaFtdcDepthMarketDataField {
 			})
 
 			return data.(*CRsaFtdcDepthMarketDataField)
+		} else {
+			count++
+
+			if count <= 10 {
+				slog.Warn(
+					"get tick from pool failed",
+					slog.Int("fail_count", count),
+				)
+			} else {
+				slog.Error(
+					"get tick attemps exceeded",
+					slog.Int("fail_count", count),
+				)
+
+				panic("get tick attemps exceeded")
+			}
 		}
 	}
 }
@@ -201,6 +218,7 @@ var (
 )
 
 func GetBar() *CRsaFtdcBarMarketDataField {
+	count := 0
 	for {
 		if data := barPool.Get(); data != nil {
 			runtime.SetFinalizer(data, func(v any) {
@@ -209,6 +227,22 @@ func GetBar() *CRsaFtdcBarMarketDataField {
 			})
 
 			return data.(*CRsaFtdcBarMarketDataField)
+		} else {
+			count++
+
+			if count <= 10 {
+				slog.Warn(
+					"get bar from pool failed",
+					slog.Int("fail_count", count),
+				)
+			} else {
+				slog.Error(
+					"get bar attemps exceeded",
+					slog.Int("fail_count", count),
+				)
+
+				panic("get bar attemps exceeded")
+			}
 		}
 	}
 }
