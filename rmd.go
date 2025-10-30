@@ -49,7 +49,7 @@ type RmdSpi interface {
 		info *CRsaFtdcRspInfoField,
 		requestID int, isLast bool,
 	)
-	OnRtnMarketDataEnd(td *CRsaFtdcNtfMarketDataEndField)
+	OnRtnMarketDataEnd(dt *CRsaFtdcNtfMarketDataEndField)
 }
 
 type goFtdcMdSpi struct {
