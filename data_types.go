@@ -180,223 +180,223 @@ type TRsaFtdcYearType int
 type TRsaFtdcIsUpdateType uint8
 
 // TFtdcAliasType是一个别名类型
-type TRsaFtdcAliasType [21]uint8
+type TRsaFtdcAliasType string
 
 // TFtdcMemTableNameType是一个内存表名类型
-type TRsaFtdcMemTableNameType [61]uint8
+type TRsaFtdcMemTableNameType string
 
 // TFtdcOrderSysIDType是一个报单编号类型
-type TRsaFtdcOrderSysIDType [33]uint8
+type TRsaFtdcOrderSysIDType string
 
 // TFtdcTradeIDType是一个成交编号类型
-type TRsaFtdcTradeIDType [33]uint8
+type TRsaFtdcTradeIDType string
 
 // TFtdcUserIDType是一个用户代码类型
-type TRsaFtdcUserIDType [19]uint8
+type TRsaFtdcUserIDType string
 
 // TFtdcTraderIDType是一个用户代码类型
-type TRsaFtdcTraderIDType [19]uint8
+type TRsaFtdcTraderIDType string
 
 // TFtdcParticipantIDType是一个会员编号类型
-type TRsaFtdcParticipantIDType [11]uint8
+type TRsaFtdcParticipantIDType string
 
 // TFtdcIPAddressType是一个IP地址类型
-type TRsaFtdcIPAddressType [21]uint8
+type TRsaFtdcIPAddressType string
 
 // TFtdcMacAddressType是一个Mac地址类型
-type TRsaFtdcMacAddressType [21]uint8
+type TRsaFtdcMacAddressType string
 
 // TFtdcInstrumentNameType是一个合约名称类型
-type TRsaFtdcInstrumentNameType [21]uint8
+type TRsaFtdcInstrumentNameType string
 
 // TFtdcBranchIDType是一个营业部代码类型
-type TRsaFtdcBranchIDType [16]uint8
+type TRsaFtdcBranchIDType string
 
 // TFtdcBranchNameType是一个营业部名称类型
-type TRsaFtdcBranchNameType [81]uint8
+type TRsaFtdcBranchNameType string
 
 // TFtdcInstrumentIDType是一个合约编号类型
-type TRsaFtdcInstrumentIDType [31]uint8
+type TRsaFtdcInstrumentIDType string
 
 // TFtdcExchangeIDType是一个交易(所)通道类型
-type TRsaFtdcExchangeIDType [11]uint8
+type TRsaFtdcExchangeIDType string
 
 // TFtdcExchangeNameType是一个交易(所)名称类型
-type TRsaFtdcExchangeNameType [31]uint8
+type TRsaFtdcExchangeNameType string
 
 // TFtdcDateType是一个日期类型
-type TRsaFtdcDateType [9]uint8
+type TRsaFtdcDateType string
 
 // TFtdcTimeType是一个时间类型
-type TRsaFtdcTimeType [9]uint8
+type TRsaFtdcTimeType string
 
 // TFtdcClientIDType是一个客户编码类型
-type TRsaFtdcClientIDType [19]uint8
+type TRsaFtdcClientIDType string
 
 // TFtdcAccountIDType是一个资金帐号类型
-type TRsaFtdcAccountIDType [19]uint8
+type TRsaFtdcAccountIDType string
 
 // TFtdcSeatIDType是一个席位号类型
-type TRsaFtdcSeatIDType [129]uint8
+type TRsaFtdcSeatIDType string
 
 // TFtdcProductNameType是一个品种名称类型
-type TRsaFtdcProductNameType [41]uint8
+type TRsaFtdcProductNameType string
 
 // TFtdcUserOrderLocalIDType是一个用户本地报单号类型
-type TRsaFtdcUserOrderLocalIDType [23]uint8
+type TRsaFtdcUserOrderLocalIDType string
 
 // TFtdcOrderLocalIDType是一个本地报单编号类型
-type TRsaFtdcOrderLocalIDType [33]uint8
+type TRsaFtdcOrderLocalIDType string
 
 // TFtdcInvestorIDType是一个投资者编号类型
-type TRsaFtdcInvestorIDType [19]uint8
+type TRsaFtdcInvestorIDType string
 
 // TFtdcInvestorNameType是一个投资者名称类型
-type TRsaFtdcInvestorNameType [31]uint8
+type TRsaFtdcInvestorNameType string
 
 // TFtdcUserNameType是一个用户编码类型
-type TRsaFtdcUserNameType [31]uint8
+type TRsaFtdcUserNameType string
 
 // TFtdcPasswordType是一个密码类型
-type TRsaFtdcPasswordType [41]uint8
+type TRsaFtdcPasswordType string
 
 // TFtdcProductInfoType是一个产品信息类型
-type TRsaFtdcProductInfoType [51]uint8
+type TRsaFtdcProductInfoType string
 
 // TFtdcLoginInfoType是一个登录信息类型
-type TRsaFtdcLoginInfoType [257]uint8
+type TRsaFtdcLoginInfoType string
 
 // TFtdcProtocolInfoType是一个协议信息类型
-type TRsaFtdcProtocolInfoType [41]uint8
+type TRsaFtdcProtocolInfoType string
 
 // TFtdcBusinessUnitType是一个业务单元类型
-type TRsaFtdcBusinessUnitType [32]uint8
+type TRsaFtdcBusinessUnitType string
 
 // TFtdcTradingSystemNameType是一个交易系统名称类型
-type TRsaFtdcTradingSystemNameType [61]uint8
+type TRsaFtdcTradingSystemNameType string
 
 // TFtdcCommandTypeType是一个DB命令类型类型
-type TRsaFtdcCommandTypeType [65]uint8
+type TRsaFtdcCommandTypeType string
 
 // TFtdcBrokerIDType是一个经纪公司编号类型
-type TRsaFtdcBrokerIDType [11]uint8
+type TRsaFtdcBrokerIDType string
 
 // TFtdcCustomType是一个用户自定义域类型类型
-type TRsaFtdcCustomType [65]uint8
+type TRsaFtdcCustomType string
 
 // TFtdcTradingDayType是一个交易日类型
-type TRsaFtdcTradingDayType [9]uint8
+type TRsaFtdcTradingDayType TRsaFtdcDateType
 
 // TFtdcDepartmentType是一个营业部类型
-type TRsaFtdcDepartmentType [41]uint8
+type TRsaFtdcDepartmentType string
 
 // TFtdcGrantFuncSetType是一个授权功能号类型
 type TRsaFtdcGrantFuncSetType [5]uint8
 
 // TFtdcProductIDType是一个品种编号类型
-type TRsaFtdcProductIDType [13]uint8
+type TRsaFtdcProductIDType string
 
 // TFtdcAccountSeqNoType是一个资金流水号类型
-type TRsaFtdcAccountSeqNoType [21]uint8
+type TRsaFtdcAccountSeqNoType string
 
 // TFtdcInstrumentGroupIDType是一个合约组代码类型
-type TRsaFtdcInstrumentGroupIDType [31]uint8
+type TRsaFtdcInstrumentGroupIDType string
 
 // TFtdcCurrencyType是一个币种代码类型
-type TRsaFtdcCurrencyType [5]uint8
+type TRsaFtdcCurrencyType string
 
 // TFtdcSubInstrumentIDType是一个订阅信息类型
-type TRsaFtdcSubInstrumentIDType [65]uint8
+type TRsaFtdcSubInstrumentIDType string
 
 // TFtdcAdviceUserInfoType是一个用户代码类型
-type TRsaFtdcAdviceUserInfoType [257]uint8
+type TRsaFtdcAdviceUserInfoType string
 
 // TFtdcHDSerialIDType是一个硬盘序列号类型
-type TRsaFtdcHDSerialIDType [129]uint8
+type TRsaFtdcHDSerialIDType string
 
 // TFtdcInvestUnitIDType是一个投资单元代码类型
-type TRsaFtdcInvestUnitIDType [18]uint8
+type TRsaFtdcInvestUnitIDType string
 
 // TFtdcSObjectType是一个状态对象类型
-type TRsaFtdcSObjectType [33]uint8
+type TRsaFtdcSObjectType string
 
 // TFtdcOrderRefType是一个报单引用类型
-type TRsaFtdcOrderRefType [14]uint8
+type TRsaFtdcOrderRefType string
 
 // TFtdcExchangeInstIDType是一个合约在交易所的代码类型
-type TRsaFtdcExchangeInstIDType [32]uint8
+type TRsaFtdcExchangeInstIDType string
 
 // TFtdcCPBHType是一个产品编号类型
-type TRsaFtdcCPBHType [65]uint8
+type TRsaFtdcCPBHType string
 
 // TFtdcGDDMType是一个股东代码类型
-type TRsaFtdcGDDMType [33]uint8
+type TRsaFtdcGDDMType string
 
 // TFtdcOthMarkIdType是一个外部标识类型
-type TRsaFtdcOthMarkIdType [65]uint8
+type TRsaFtdcOthMarkIdType string
 
 // TFtdcFunctionIdType是一个指令编号类型
 type TRsaFtdcFunctionIdType [21]uint8
 
 // TFtdcDataKeyType是一个数据关键字类型
-type TRsaFtdcDataKeyType [51]uint8
+type TRsaFtdcDataKeyType string
 
 // TFtdcSysTagType是一个系统标识类型
-type TRsaFtdcSysTagType [33]uint8
+type TRsaFtdcSysTagType string
 
 // TFtdcPluginIdType是一个插件代码类型
-type TRsaFtdcPluginIdType [33]uint8
+type TRsaFtdcPluginIdType string
 
 // TFtdcSessionNameType是一个交易节名称类型
-type TRsaFtdcSessionNameType [17]uint8
+type TRsaFtdcSessionNameType string
 
 // TFtdcFormulaType是一个公式类型
-type TRsaFtdcFormulaType [201]uint8
+type TRsaFtdcFormulaType string
 
 // TFtdcTickBSFlagType是一个Tick买卖标志类型
 type TRsaFtdcTickBSFlagType [9]uint8
 
 // TFtdcErrorMsgType是一个错误信息类型
-type TRsaFtdcErrorMsgType [129]uint8
+type TRsaFtdcErrorMsgType string
 
 // TFtdcAppIDType是一个认证编码类型
-type TRsaFtdcAppIDType [129]uint8
+type TRsaFtdcAppIDType string
 
 // TFtdcAuthCodeType是一个授权编码类型
-type TRsaFtdcAuthCodeType [129]uint8
+type TRsaFtdcAuthCodeType string
 
 // TFtdcLargeErrorMsgType是一个超长错误信息类型
-type TRsaFtdcLargeErrorMsgType [257]uint8
+type TRsaFtdcLargeErrorMsgType string
 
 // TFtdcFieldNameType是一个字段名类型
-type TRsaFtdcFieldNameType [1025]uint8
+type TRsaFtdcFieldNameType string
 
 // TFtdcFieldContentType是一个字段内容类型
-type TRsaFtdcFieldContentType [1025]uint8
+type TRsaFtdcFieldContentType string
 
 // TFtdcContentType是一个字段内容类型
-type TRsaFtdcContentType [501]uint8
+type TRsaFtdcContentType string
 
 // TFtdcStatusMsgType是一个模块状态信息类型
-type TRsaFtdcStatusMsgType [1025]uint8
+type TRsaFtdcStatusMsgType string
 
 // TFtdcClientSystemInfoType是一个终端采集信息类型
-type TRsaFtdcClientSystemInfoType [1537]uint8
+type TRsaFtdcClientSystemInfoType string
 
 // TFtdcJsonDataType是一个Json内容类型
-type TRsaFtdcJsonDataType [3073]uint8
+type TRsaFtdcJsonDataType string
 
 // TFtdcLongJsonDataType是一个Json内容类型
-type TRsaFtdcLongJsonDataType [3601]uint8
+type TRsaFtdcLongJsonDataType string
 
 // TFtdcMessageType是一个信息类型
-type TRsaFtdcMessageType [257]uint8
+type TRsaFtdcMessageType string
 
 // TFtdcQuoteIDType是一个系统询价编号类型
-type TRsaFtdcQuoteIDType [17]uint8
+type TRsaFtdcQuoteIDType string
 
 // TFtdcMessageTypeType是一个信息类型（字符串）类型
-type TRsaFtdcMessageTypeType [33]uint8
+type TRsaFtdcMessageTypeType string
 
 // TFtdcVolumeConditionType是一个成交量类型类型
 // 任何数量

@@ -9,13 +9,19 @@ package rmd4go
 import "C"
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log/slog"
+	"path/filepath"
 	"runtime"
 	"sync"
 	"sync/atomic"
 	"unsafe"
+)
+
+var (
+	spiCVtablePtr *C.CFtdcMdSpiVtable
 )
 
 type RmdSpi interface {
@@ -47,19 +53,28 @@ type RmdSpi interface {
 }
 
 type goFtdcMdSpi struct {
-	vtable C.CFtdcMdSpiVtable
-
+	pinner   runtime.Pinner
 	callback RmdSpi
 }
 
 //export CgoOnMdFrontConnected
 func CgoOnMdFrontConnected(this unsafe.Pointer) {
-	(*goFtdcMdSpi)(this).callback.OnMdFrontConnected()
+	slog.Log(
+		context.Background(), slog.LevelDebug-1,
+		"rmd CgoOnMdFrontConnected called",
+		slog.Any("spi", this),
+	)
+
+	(*goFtdcMdSpi)(
+		(*C.CFtdcMdSpiExt)(this).spi,
+	).callback.OnMdFrontConnected()
 }
 
 //export CgoOnMdFrontDisconnected
 func CgoOnMdFrontDisconnected(this unsafe.Pointer, nReason C.int) {
-	(*goFtdcMdSpi)(this).callback.OnMdFrontDisconnected(int(nReason))
+	(*goFtdcMdSpi)(
+		(*C.CFtdcMdSpiExt)(this).spi,
+	).callback.OnMdFrontDisconnected(int(nReason))
 }
 
 //export CgoOnMdRspUserLogin
@@ -69,10 +84,16 @@ func CgoOnMdRspUserLogin(
 	pRspInfo *C.struct_CRsaFtdcRspInfoField,
 	nRequestID C.int, bIsLast C.bool,
 ) {
-	(*goFtdcMdSpi)(this).callback.OnMdRspUserLogin(
-		(*CRsaFtdcRspUserLoginField)(unsafe.Pointer(pRspUserLogin)),
-		(*CRsaFtdcRspInfoField)(unsafe.Pointer(pRspInfo)),
-		int(nRequestID), bool(bIsLast),
+	rsp := CRsaFtdcRspUserLoginField{}
+	rsp.TradingDay = C.GoString(&pRspUserLogin.TradingDay[0])
+	info := CRsaFtdcRspInfoField{}
+	info.ErrorID = int(pRspInfo.ErrorID)
+	info.ErrorMsg = ReadCString([]byte(C.GoString(&pRspInfo.ErrorMsg[0])))
+
+	(*goFtdcMdSpi)(
+		(*C.CFtdcMdSpiExt)(this).spi,
+	).callback.OnMdRspUserLogin(
+		&rsp, &info, int(nRequestID), bool(bIsLast),
 	)
 }
 
@@ -81,7 +102,9 @@ func CgoOnRtnDepthMarketData(
 	this unsafe.Pointer,
 	pDepthMarketData *C.struct_CRsaFtdcDepthMarketDataField,
 ) {
-	(*goFtdcMdSpi)(this).callback.OnRtnDepthMarketData(
+	(*goFtdcMdSpi)(
+		(*C.CFtdcMdSpiExt)(this).spi,
+	).callback.OnRtnDepthMarketData(
 		(*CRsaFtdcDepthMarketDataField)(unsafe.Pointer(pDepthMarketData)))
 }
 
@@ -92,7 +115,9 @@ func CgoOnRspSubMarketData(
 	pRspInfo *C.struct_CRsaFtdcRspInfoField,
 	nRequestID C.int, bIsLast C.bool,
 ) {
-	(*goFtdcMdSpi)(this).callback.OnRspSubMarketData(
+	(*goFtdcMdSpi)(
+		(*C.CFtdcMdSpiExt)(this).spi,
+	).callback.OnRspSubMarketData(
 		(*CRsaFtdcSpecificInstrumentField)(unsafe.Pointer(pSpecificInstrument)),
 		(*CRsaFtdcRspInfoField)(unsafe.Pointer(pRspInfo)),
 		int(nRequestID), bool(bIsLast),
@@ -106,7 +131,9 @@ func CgoOnRspUnSubMarketData(
 	pRspInfo *C.struct_CRsaFtdcRspInfoField,
 	nRequestID C.int, bIsLast C.bool,
 ) {
-	(*goFtdcMdSpi)(this).callback.OnRspUnSubMarketData(
+	(*goFtdcMdSpi)(
+		(*C.CFtdcMdSpiExt)(this).spi,
+	).callback.OnRspUnSubMarketData(
 		(*CRsaFtdcSpecificInstrumentField)(unsafe.Pointer(pSpecificInstrument)),
 		(*CRsaFtdcRspInfoField)(unsafe.Pointer(pRspInfo)),
 		int(nRequestID), bool(bIsLast),
@@ -118,7 +145,9 @@ func CgoOnRtnBarMarketData(
 	this unsafe.Pointer,
 	pBarMarketData *C.struct_CRsaFtdcBarMarketDataField,
 ) {
-	(*goFtdcMdSpi)(this).callback.OnRtnBarMarketData(
+	(*goFtdcMdSpi)(
+		(*C.CFtdcMdSpiExt)(this).spi,
+	).callback.OnRtnBarMarketData(
 		(*CRsaFtdcBarMarketDataField)(unsafe.Pointer(pBarMarketData)),
 	)
 }
@@ -130,7 +159,9 @@ func CgoOnRspQryMarketData(
 	pRspInfo *C.struct_CRsaFtdcRspInfoField,
 	nRequestID C.int, bIsLast C.bool,
 ) {
-	(*goFtdcMdSpi)(this).callback.OnRspQryMarketData(
+	(*goFtdcMdSpi)(
+		(*C.CFtdcMdSpiExt)(this).spi,
+	).callback.OnRspQryMarketData(
 		(*CRsaFtdcRspMarketDataField)(unsafe.Pointer(pRspMarketData)),
 		(*CRsaFtdcRspInfoField)(unsafe.Pointer(pRspInfo)),
 		int(nRequestID), bool(bIsLast),
@@ -142,7 +173,9 @@ func CgoOnRtnMarketDataEnd(
 	this unsafe.Pointer,
 	pMarketDataEnd *C.struct_CRsaFtdcNtfMarketDataEndField,
 ) {
-	(*goFtdcMdSpi)(this).callback.OnRtnMarketDataEnd(
+	(*goFtdcMdSpi)(
+		(*C.CFtdcMdSpiExt)(this).spi,
+	).callback.OnRtnMarketDataEnd(
 		(*CRsaFtdcNtfMarketDataEndField)(unsafe.Pointer(pMarketDataEnd)),
 	)
 }
@@ -166,7 +199,7 @@ type CFtdcMdApi struct {
 
 	lib unsafe.Pointer
 
-	spiPtr       goFtdcMdSpi
+	spiPtr       *goFtdcMdSpi
 	registerOnce sync.Once
 
 	reqID atomic.Int32
@@ -189,18 +222,32 @@ func CreateFtdcMdApi(
 	frontAddr, flowPath, userApiType string,
 	needHisTick bool,
 ) (api *CFtdcMdApi, err error) {
+	libPath, err = filepath.Abs(libPath)
+	if err != nil {
+		return nil, err
+	}
+
 	lib_path := C.CString(libPath)
-	defer C.free(unsafe.Pointer(&lib_path))
+	defer C.free(unsafe.Pointer(lib_path))
+
+	slog.Info(
+		"try to open rmd api lib",
+		slog.String("lib", libPath),
+	)
 
 	lib := C.dlopen(lib_path, C.RTLD_LAZY)
 	if lib == nil {
 		msg := C.dlerror()
 
 		err = fmt.Errorf(
-			"%w: %s", errLibOpenFialed, C.GoString(msg),
+			"%w: %s", errLibOpenFialed,
+			ReadCString(([]byte)(C.GoString(msg))),
 		)
+
 		return
 	}
+
+	slog.Info("rmd api lib opened", slog.String("lib", libPath))
 
 	var creatorName *C.char
 
@@ -224,6 +271,10 @@ func CreateFtdcMdApi(
 		)
 		return
 	} else {
+		slog.Info(
+			"rmd api instance creator found, try to create api instance",
+		)
+
 		pszFrontAddr := C.CString(frontAddr)
 		pszFlowPath := C.CString(flowPath)
 		pszUserApiType := C.CString(userApiType)
@@ -247,7 +298,8 @@ func CreateFtdcMdApi(
 
 			runtime.SetFinalizer(api, func(ins *CFtdcMdApi) {
 				ins.Release()
-				ins.spiPtr.callback = nil
+				ins.spiPtr = nil
+				ins.spiPtr.pinner.Unpin()
 
 				C.dlclose(ins.lib)
 			})
@@ -303,13 +355,24 @@ func (api *CFtdcMdApi) RegisterSpi(spi RmdSpi) {
 	}
 
 	api.registerOnce.Do(func() {
-		api.spiPtr.vtable = *C.SPI_VTABLE
+		api.spiPtr = new(goFtdcMdSpi)
 		api.spiPtr.callback = spi
+
+		api.spiPtr.pinner.Pin(unsafe.Pointer(api.spiPtr))
+		slog.Debug(
+			"spi wrapper pinned",
+			slog.Any("spi", spi),
+			slog.Any("pinned", api.spiPtr),
+		)
+
+		cSpi := C.malloc(C.sizeof_CFtdcMdSpiExt)
+		(*C.CFtdcMdSpiExt)(cSpi).vtable = spiCVtablePtr
+		(*C.CFtdcMdSpiExt)(cSpi).spi = unsafe.Pointer(api.spiPtr)
 
 		C.CallRegisterSpi(
 			api.apiPtr.vtable.CFtdcMdApiVtable_RegisterSpi,
 			unsafe.Pointer(api.apiPtr),
-			unsafe.Pointer(&api.spiPtr),
+			cSpi,
 		)
 	})
 }
@@ -568,23 +631,28 @@ func (api *CFtdcMdApi) ReqQryDepthMarketData(
 }
 
 func init() {
-	// C.SPI_VTABLE = (*C.CFtdcMdSpiVtable)(C.malloc(C.sizeof_CFtdcMdSpiVtable))
-	// C.SPI_VTABLE.CFtdcMdSpi_OnMdFrontConnected = (C.OnMdFrontConnected)(
-	// 	unsafe.Pointer(C.COnMdFrontConnected))
-	// C.SPI_VTABLE.CFtdcMdSpi_OnMdFrontDisconnected = (C.OnMdFrontDisconnected)(
-	// 	unsafe.Pointer(C.COnMdFrontDisconnected))
-	// C.SPI_VTABLE.CFtdcMdSpi_OnMdRspUserLogin = (C.OnMdRspUserLogin)(
-	// 	unsafe.Pointer(C.COnMdRspUserLogin))
-	// C.SPI_VTABLE.CFtdcMdSpi_OnRtnDepthMarketData = (C.OnRtnDepthMarketData)(
-	// 	unsafe.Pointer(C.COnRtnDepthMarketData))
-	// C.SPI_VTABLE.CFtdcMdSpi_OnRspSubMarketData = (C.OnRspSubMarketData)(
-	// 	unsafe.Pointer(C.COnRspSubMarketData))
-	// C.SPI_VTABLE.CFtdcMdSpi_OnRspUnSubMarketData = (C.OnRspUnSubMarketData)(
-	// 	unsafe.Pointer(C.COnRspUnSubMarketData))
-	// C.SPI_VTABLE.CFtdcMdSpi_OnRtnBarMarketData = (C.OnRtnBarMarketData)(
-	// 	unsafe.Pointer(C.COnRtnBarMarketData))
-	// C.SPI_VTABLE.CFtdcMdSpi_OnRspQryMarketData = (C.OnRspQryMarketData)(
-	// 	unsafe.Pointer(C.COnRspQryMarketData))
-	// C.SPI_VTABLE.CFtdcMdSpi_OnRtnMarketDataEnd = (C.OnRtnMarketDataEnd)(
-	// 	unsafe.Pointer(C.COnRtnMarketDataEnd))
+	slog.Info("initializing RMD SPI vtable")
+
+	spiCVtablePtr = (*C.CFtdcMdSpiVtable)(C.malloc(C.sizeof_CFtdcMdSpiVtable))
+
+	spiCVtablePtr.CFtdcMdSpi_OnMdFrontConnected = (C.OnMdFrontConnected)(
+		unsafe.Pointer(C.COnMdFrontConnected))
+	spiCVtablePtr.CFtdcMdSpi_OnMdFrontDisconnected = (C.OnMdFrontDisconnected)(
+		unsafe.Pointer(C.COnMdFrontDisconnected))
+	spiCVtablePtr.CFtdcMdSpi_OnMdRspUserLogin = (C.OnMdRspUserLogin)(
+		unsafe.Pointer(C.COnMdRspUserLogin))
+	spiCVtablePtr.CFtdcMdSpi_OnRtnDepthMarketData = (C.OnRtnDepthMarketData)(
+		unsafe.Pointer(C.COnRtnDepthMarketData))
+	spiCVtablePtr.CFtdcMdSpi_OnRspSubMarketData = (C.OnRspSubMarketData)(
+		unsafe.Pointer(C.COnRspSubMarketData))
+	spiCVtablePtr.CFtdcMdSpi_OnRspUnSubMarketData = (C.OnRspUnSubMarketData)(
+		unsafe.Pointer(C.COnRspUnSubMarketData))
+	spiCVtablePtr.CFtdcMdSpi_OnRtnBarMarketData = (C.OnRtnBarMarketData)(
+		unsafe.Pointer(C.COnRtnBarMarketData))
+	spiCVtablePtr.CFtdcMdSpi_OnRspQryMarketData = (C.OnRspQryMarketData)(
+		unsafe.Pointer(C.COnRspQryMarketData))
+	spiCVtablePtr.CFtdcMdSpi_OnRtnMarketDataEnd = (C.OnRtnMarketDataEnd)(
+		unsafe.Pointer(C.COnRtnMarketDataEnd))
+
+	slog.Info("RMD SPI vtable initialized")
 }

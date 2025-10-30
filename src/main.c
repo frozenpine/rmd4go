@@ -1,6 +1,12 @@
-#include <stdio.h>
+
+#include <unistd.h>
 
 #include "helper.h"
+
+typedef struct {
+	CFtdcMdSpiVtable* vtable;
+} CFtdcMdSpiExt;
+
 
 const char* CREATE_RMD_API_WIN = "?CreateFtdcMdApi@CFtdcMdApi@@SAPEAV1@PEBD00_N@Z";
 const char* CREATE_RMD_API_LIN = "_ZN10CFtdcMdApi15CreateFtdcMdApiEPKcS1_S1_b";
@@ -50,7 +56,7 @@ void CgoOnRtnMarketDataEnd(
 
 int main(int argc, char** argv) 
 {
-    SPI_VTABLE = malloc(sizeof(CFtdcMdSpiVtable));
+    CFtdcMdSpiVtable* SPI_VTABLE = malloc(sizeof(CFtdcMdSpiVtable));
     SPI_VTABLE->CFtdcMdSpi_OnMdFrontConnected = COnMdFrontConnected;
     SPI_VTABLE->CFtdcMdSpi_OnMdFrontDisconnected = COnMdFrontDisconnected;
 	SPI_VTABLE->CFtdcMdSpi_OnMdRspUserLogin = COnMdRspUserLogin;
@@ -73,6 +79,7 @@ int main(int argc, char** argv)
     CreateFtdcMdApi creator = dlsym(lib, CREATE_RMD_API_LIN);
     if (NULL == creator) {
         fprintf(stderr, "api creator[%s] not found: %s\n", CREATE_RMD_API_WIN, dlerror());
+        dlclose(lib);
         return -1;
     } else {
         fprintf(stdout, "creator[%s] found in lib\n", CREATE_RMD_API_WIN);
@@ -81,12 +88,22 @@ int main(int argc, char** argv)
     CFtdcMdApiExt* api = creator(FRONT_ADDR, FLOW_PATH, "c demo", false);
     if (NULL == api) {
         fprintf(stderr, "create api failed\n");
+        dlclose(lib);
         return 1;
     } else {
         fprintf(stdout, "api instance created: %x\n", api);
     }
 
-    api->vtable.CFtdcMdApiVtable_RegisterSpi(api, SPI_VTABLE);
-    fprintf(stdout, "spi registered: %x\n", SPI_VTABLE);
-    api->vtable.CFtdcMdApiVtable_Init(api);
+    CFtdcMdApiExt* spi = malloc(sizeof(CFtdcMdSpiExt));
+    spi->vtable = SPI_VTABLE;
+
+    api->vtable->CFtdcMdApiVtable_RegisterSpi(api, spi);
+    fprintf(stdout, "spi registered: %x\n", spi);
+    
+    api->vtable->CFtdcMdApiVtable_Init(api);
+    fprintf(stdout, "waiting 5s for connect\n");
+    
+    sleep(5);
+
+    api->vtable->CFtdcMdApiVtable_Release(api);
 }

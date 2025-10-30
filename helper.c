@@ -39,11 +39,13 @@ extern void CgoOnRtnMarketDataEnd(
 
 void COnMdFrontConnected(void* this) 
 { 
+	fprintf(stderr, "COnMdFrontConnected callbacked: %x\n", this);
     CgoOnMdFrontConnected(this); 
 }
 
 void COnMdFrontDisconnected(void* this, int nReason) 
-{ 
+{
+	fprintf(stderr, "COnMdFrontDisconnected callbacked: %x, %d\n", this, nReason); 
     CgoOnMdFrontDisconnected(this, nReason); 
 }
 

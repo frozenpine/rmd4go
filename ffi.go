@@ -28,7 +28,7 @@ var decoder = simplifiedchinese.GB18030.NewDecoder()
 func ReadCString(buff []uint8) string {
 	idx := bytes.IndexByte(buff, 0)
 	if idx <= 0 {
-		return ""
+		idx = len(buff)
 	}
 
 	if IsASCII(buff[:idx]) {

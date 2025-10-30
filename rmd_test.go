@@ -17,7 +17,7 @@ type TestClient struct {
 	wait chan bool
 }
 
-func (c *TestClient) OnFrontConnected() {
+func (c *TestClient) OnMdFrontConnected() {
 	c.t.Log("front connected")
 	c.wait <- true
 }
@@ -35,7 +35,7 @@ func (c *TestClient) OnMdRspUserLogin(
 	if info.ErrorID != 0 {
 		c.t.Logf(
 			"user login failed[%d]: %s",
-			info.ErrorID, rmd4go.ReadCString(info.ErrorMsg[:]),
+			info.ErrorID, info.ErrorMsg,
 		)
 		c.wait <- false
 		return
@@ -44,9 +44,7 @@ func (c *TestClient) OnMdRspUserLogin(
 	if login != nil {
 		c.t.Logf(
 			"user login: %s.%s @ %s",
-			rmd4go.ReadCString(login.BrokerID[:]),
-			rmd4go.ReadCString(login.UserID[:]),
-			rmd4go.ReadCString(login.LoginTime[:]),
+			login.BrokerID, login.UserID, login.LoginTime,
 		)
 	}
 
@@ -66,7 +64,7 @@ func (c *TestClient) OnRspSubMarketData(
 	if info.ErrorID != 0 {
 		c.t.Logf(
 			"sub market data failed[%d]: %s",
-			info.ErrorID, rmd4go.ReadCString(info.ErrorMsg[:]),
+			info.ErrorID, info.ErrorMsg,
 		)
 		c.wait <- false
 		return
@@ -75,8 +73,8 @@ func (c *TestClient) OnRspSubMarketData(
 	if instrument != nil {
 		c.t.Logf(
 			"market data subscribed: %s.%s",
-			rmd4go.ReadCString(instrument.ExchangeID[:]),
-			rmd4go.ReadCString(instrument.InstrumentID[:]),
+			instrument.ExchangeID,
+			instrument.InstrumentID,
 		)
 	}
 
@@ -93,7 +91,7 @@ func (c *TestClient) OnRspUnSubMarketData(
 	if info.ErrorID != 0 {
 		c.t.Logf(
 			"un-sub market data failed[%d]: %s",
-			info.ErrorID, rmd4go.ReadCString(info.ErrorMsg[:]),
+			info.ErrorID, info.ErrorMsg,
 		)
 		c.wait <- false
 		return
@@ -102,8 +100,8 @@ func (c *TestClient) OnRspUnSubMarketData(
 	if instrument != nil {
 		c.t.Logf(
 			"market data un-subscribed: %s.%s",
-			rmd4go.ReadCString(instrument.ExchangeID[:]),
-			rmd4go.ReadCString(instrument.InstrumentID[:]),
+			instrument.ExchangeID,
+			instrument.InstrumentID,
 		)
 	}
 
@@ -125,7 +123,7 @@ func (c *TestClient) OnRspQryMarketData(
 	if info.ErrorID != 0 {
 		c.t.Logf(
 			"query market data failed[%d]: %s",
-			info.ErrorID, rmd4go.ReadCString(info.ErrorMsg[:]),
+			info.ErrorID, info.ErrorMsg,
 		)
 		c.wait <- false
 		return
@@ -134,8 +132,7 @@ func (c *TestClient) OnRspQryMarketData(
 	if md != nil {
 		c.t.Logf(
 			"market data un-subscribed: %s.%s",
-			rmd4go.ReadCString(md.ExchangeID[:]),
-			rmd4go.ReadCString(md.InstrumentID[:]),
+			md.ExchangeID, md.InstrumentID,
 		)
 	}
 
@@ -151,7 +148,7 @@ func (c *TestClient) OnRtnMarketDataEnd(td *rmd4go.CRsaFtdcNtfMarketDataEndField
 func TestApiSpi(t *testing.T) {
 	var (
 		err       error
-		libPath   = "../dependencies/libs"
+		libPath   = "./dependencies/libs"
 		frontAddr = "tcp://172.16.200.105:30010"
 		flowPath  = "./flow/"
 	)
@@ -171,11 +168,16 @@ func TestApiSpi(t *testing.T) {
 		}
 	} else if !info.IsDir() {
 		t.Fatalf("flow path not dir: %s", flowPath)
+	} else {
+		t.Log("flow path ok")
 	}
 
 	api := TestClient{
-		t: t,
+		t:    t,
+		wait: make(chan bool),
 	}
+
+	t.Log("creating rmd api")
 
 	if api.CFtdcMdApi, err = rmd4go.CreateFtdcMdApi(
 		libPath, frontAddr, flowPath, "rmd-sys lib test", false,
@@ -183,7 +185,13 @@ func TestApiSpi(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	api.RegisterSpi(&api)
+
+	t.Log("rmd spi registered")
+
 	api.Init()
+
+	t.Log("rmd api initiated")
 
 	select {
 	case <-time.After(time.Second * 10):
@@ -195,6 +203,8 @@ func TestApiSpi(t *testing.T) {
 	}
 
 	if err := api.ReqUserLogin(&rmd4go.CRsaFtdcReqUserLoginField{}); err != nil {
-		t.Fatalf("login failed: %+v", err)
+		t.Fatalf("req login failed: %+v", err)
+	} else {
+		<-api.wait
 	}
 }

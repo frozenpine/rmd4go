@@ -10,6 +10,7 @@ extern "C" {
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <strings.h>
 #include <dlfcn.h>
 
@@ -92,7 +93,7 @@ typedef struct {
 } CFtdcMdApiVtable;
 
 typedef struct {
-	CFtdcMdApiVtable vtable;
+	CFtdcMdApiVtable* vtable;
 } CFtdcMdApiExt;
 
 typedef void* (*CreateFtdcMdApi)(
@@ -278,6 +279,11 @@ typedef struct {
 	OnRspQryMarketData CFtdcMdSpi_OnRspQryMarketData;
 	OnRtnMarketDataEnd CFtdcMdSpi_OnRtnMarketDataEnd;
 } CFtdcMdSpiVtable;
+
+typedef struct {
+	CFtdcMdSpiVtable* vtable;
+	void* spi;
+} CFtdcMdSpiExt;
 
 #ifdef __cplusplus
 }
