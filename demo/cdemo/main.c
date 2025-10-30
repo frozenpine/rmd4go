@@ -5,10 +5,10 @@
 
 #ifdef _WIN32
 const char* CREATE_RMD_API = "?CreateFtdcMdApi@CFtdcMdApi@@SAPEAV1@PEBD00_N@Z";
-const char* LIB_PATH = "../dependencies/libs/rmdapi.dll";
+const char* LIB_PATH = "../../dependencies/libs/rmdapi.dll";
 #else
 const char* CREATE_RMD_API = "_ZN10CFtdcMdApi15CreateFtdcMdApiEPKcS1_S1_b";
-const char* LIB_PATH = "../dependencies/libs/rmdapi.so";
+const char* LIB_PATH = "../../dependencies/libs/rmdapi.so";
 #endif
 
 const char* FRONT_ADDR = "tcp://172.16.200.105:30010";

@@ -13,6 +13,7 @@ else
 endif
 
 default:
+	@mkdir -p bin
 	@gcc main.c ../../helper.c -o bin/${BINARY} ${CFLAGS} ${EXTRA_FLAGS}
 
 clean:
