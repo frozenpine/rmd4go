@@ -12,14 +12,22 @@ import (
 	"github.com/frozenpine/rmd4go"
 )
 
-type TestSpi struct{}
+type TestSpi struct {
+	wait chan bool
+}
 
 func (c TestSpi) OnMdFrontConnected() {
 	slog.Info("front connected")
+	if c.wait != nil {
+		c.wait <- true
+	}
 }
 
 func (c TestSpi) OnMdFrontDisconnected(reason int) {
 	slog.Info("front disconnected", slog.Int("reason", reason))
+	if c.wait != nil {
+		c.wait <- false
+	}
 }
 
 func (c TestSpi) OnMdRspUserLogin(
@@ -27,11 +35,15 @@ func (c TestSpi) OnMdRspUserLogin(
 	info *rmd4go.CRsaFtdcRspInfoField,
 	requestID int, isLast bool,
 ) {
-	if info.ErrorID != 0 {
+	if info != nil && info.ErrorID != 0 {
 		slog.Error(
 			"user login failed",
 			slog.Any("info", info),
 		)
+
+		if c.wait != nil {
+			c.wait <- false
+		}
 
 		return
 	}
@@ -44,6 +56,10 @@ func (c TestSpi) OnMdRspUserLogin(
 			slog.Bool("last", isLast),
 		)
 	}
+
+	if isLast && c.wait != nil {
+		c.wait <- true
+	}
 }
 
 func (c TestSpi) OnRtnDepthMarketData(tick *rmd4go.CRsaFtdcDepthMarketDataField) {
@@ -55,11 +71,15 @@ func (c TestSpi) OnRspSubMarketData(
 	info *rmd4go.CRsaFtdcRspInfoField,
 	requestID int, isLast bool,
 ) {
-	if info.ErrorID != 0 {
+	if info != nil && info.ErrorID != 0 {
 		slog.Error(
 			"sub market data failed",
 			slog.Any("info", info),
 		)
+
+		if c.wait != nil {
+			c.wait <- false
+		}
 
 		return
 	}
@@ -72,6 +92,10 @@ func (c TestSpi) OnRspSubMarketData(
 			slog.Bool("last", isLast),
 		)
 	}
+
+	if isLast && c.wait != nil {
+		c.wait <- true
+	}
 }
 
 func (c TestSpi) OnRspUnSubMarketData(
@@ -79,11 +103,15 @@ func (c TestSpi) OnRspUnSubMarketData(
 	info *rmd4go.CRsaFtdcRspInfoField,
 	requestID int, isLast bool,
 ) {
-	if info.ErrorID != 0 {
+	if info != nil && info.ErrorID != 0 {
 		slog.Error(
 			"un-sub market data failed",
 			slog.Any("info", info),
 		)
+
+		if c.wait != nil {
+			c.wait <- false
+		}
 
 		return
 	}
@@ -94,6 +122,10 @@ func (c TestSpi) OnRspUnSubMarketData(
 			slog.Any("ins", instrument),
 			slog.Int("req", requestID),
 		)
+	}
+
+	if isLast && c.wait != nil {
+		c.wait <- true
 	}
 }
 
@@ -112,6 +144,10 @@ func (c TestSpi) OnRspQryMarketData(
 			slog.Any("info", info),
 		)
 
+		if c.wait != nil {
+			c.wait <- false
+		}
+
 		return
 	}
 
@@ -122,6 +158,10 @@ func (c TestSpi) OnRspQryMarketData(
 			slog.Int("req", requestID),
 			slog.Bool("last", isLast),
 		)
+	}
+
+	if isLast && c.wait != nil {
+		c.wait <- true
 	}
 }
 
@@ -157,7 +197,7 @@ func TestApiSpi(t *testing.T) {
 		t.Log("flow path ok")
 	}
 
-	spi := TestSpi{}
+	spi := TestSpi{wait: make(chan bool)}
 
 	t.Log("creating rmd api")
 
@@ -176,7 +216,9 @@ func TestApiSpi(t *testing.T) {
 
 	t.Log("rmd api initiated")
 
-	<-time.After(time.Second)
+	if !<-spi.wait {
+		t.Fatal("connect failed")
+	}
 
 	if err := api.ReqUserLogin(&rmd4go.CRsaFtdcReqUserLoginField{
 		BrokerID: "rdrk",
@@ -186,7 +228,9 @@ func TestApiSpi(t *testing.T) {
 		t.Fatalf("req login failed: %+v", err)
 	}
 
-	<-time.After(time.Second)
+	if !<-spi.wait {
+		t.Fatal("login failed")
+	}
 
 	if err := api.ReqBtSubMarketData(&rmd4go.CRsaFtdcBtSubMarketDataField{
 		ExchangeID:   "CFFEX",
@@ -200,7 +244,9 @@ func TestApiSpi(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	<-time.After(time.Second)
+	if !<-spi.wait {
+		t.Fatal("sub failed")
+	}
 
 	if data, err := api.ReqQryBarMarketData(&rmd4go.CRsaFtdcBtSubMarketDataField{
 		ExchangeID:   "CFFEX",
@@ -257,13 +303,23 @@ func TestChannelSpi(t *testing.T) {
 	ctx, cancel := context.WithTimeout(t.Context(), time.Second*20)
 	defer cancel()
 
-	spi := rmd4go.NewChannelSpi[TestSpi](ctx, 100)
+	wait := make(chan bool)
+
+	spi, err := rmd4go.NewChannelSpi[TestSpi](ctx, 100, func(ts *TestSpi) error {
+		ts.wait = wait
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	api.RegisterSpi(spi)
 
 	api.Init()
 
-	<-time.After(time.Second)
+	if !<-wait {
+		t.Fatal("not connected")
+	}
 
 	if err := api.ReqUserLogin(
 		&rmd4go.CRsaFtdcReqUserLoginField{},
@@ -271,7 +327,9 @@ func TestChannelSpi(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	<-time.After(time.Second)
+	if !<-wait {
+		t.Fatal("login failed")
+	}
 
 	if err := api.ReqBtSubMarketData(
 		&rmd4go.CRsaFtdcBtSubMarketDataField{
@@ -282,7 +340,9 @@ func TestChannelSpi(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	<-time.After(time.Second)
+	if !<-wait {
+		t.Fatal("sub failed")
+	}
 
 	if data, err := api.ReqQryBarMarketData(
 		&rmd4go.CRsaFtdcBtSubMarketDataField{

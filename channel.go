@@ -326,7 +326,18 @@ func (spi *ChannelSpi[T]) Join() {
 	slog.Info("all events dispached, exit join")
 }
 
-func NewChannelSpi[T RmdSpi](ctx context.Context, buffSize int) *ChannelSpi[T] {
+func NewChannelSpi[T RmdSpi](
+	ctx context.Context, buffSize int,
+	initiator func(*T) error,
+) (*ChannelSpi[T], error) {
+	var inner T
+
+	if initiator != nil {
+		if err := initiator(&inner); err != nil {
+			return nil, err
+		}
+	}
+
 	if ctx == nil {
 		ctx = context.Background()
 	}
@@ -334,8 +345,6 @@ func NewChannelSpi[T RmdSpi](ctx context.Context, buffSize int) *ChannelSpi[T] {
 	if buffSize <= 0 {
 		buffSize = 100
 	}
-
-	var inner T
 
 	spi := ChannelSpi[T]{
 		callback:  inner,
@@ -347,5 +356,5 @@ func NewChannelSpi[T RmdSpi](ctx context.Context, buffSize int) *ChannelSpi[T] {
 
 	go spi.dispatcher()
 
-	return &spi
+	return &spi, nil
 }
