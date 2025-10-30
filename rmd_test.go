@@ -71,9 +71,7 @@ func (c *TestClient) OnRspSubMarketData(
 
 	if instrument != nil {
 		c.t.Logf(
-			"market data subscribed: %s.%s",
-			instrument.ExchangeID,
-			instrument.InstrumentID,
+			"market data subscribed: %+v", instrument,
 		)
 	}
 
@@ -141,7 +139,7 @@ func (c *TestClient) OnRtnMarketDataEnd(td *rmd4go.CRsaFtdcNtfMarketDataEndField
 }
 
 func TestApiSpi(t *testing.T) {
-	slog.SetLogLoggerLevel(slog.LevelDebug - 1)
+	slog.SetLogLoggerLevel(slog.LevelDebug)
 	var (
 		err       error
 		libPath   = "./dependencies/libs"
@@ -211,16 +209,11 @@ func TestApiSpi(t *testing.T) {
 	api.ReqBtSubMarketData(&rmd4go.CRsaFtdcBtSubMarketDataField{
 		ExchangeID:   "CFFEX",
 		InstrumentID: "IC2512",
+	}, &rmd4go.CRsaFtdcBtSubMarketDataField{
+		ExchangeID:   "CFFEX",
+		InstrumentID: "IM2512",
 	})
 	<-api.wait
-	// api.ReqSubMarketData("IC2512")
-	// <-api.wait
-
-	// api.ReqQryMarketData(&rmd4go.CRsaFtdcQryMarketDataField{
-	// 	ExchangeID:   "CFFEX",
-	// 	InstrumentID: "IC2512",
-	// })
-	// <-api.wait
 
 	<-time.After(time.Second * 20)
 }

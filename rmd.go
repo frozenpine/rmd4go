@@ -109,6 +109,23 @@ func CgoOnMdRspUserLogin(
 	)
 }
 
+var (
+	tickPool = sync.Pool{New: func() any { return new(CRsaFtdcDepthMarketDataField) }}
+)
+
+func GetTick() *CRsaFtdcDepthMarketDataField {
+	for {
+		if data := tickPool.Get(); data != nil {
+			runtime.SetFinalizer(data, func(v any) {
+				runtime.SetFinalizer(v, nil)
+				tickPool.Put(v)
+			})
+
+			return data.(*CRsaFtdcDepthMarketDataField)
+		}
+	}
+}
+
 //export CgoOnRtnDepthMarketData
 func CgoOnRtnDepthMarketData(
 	this unsafe.Pointer,
@@ -123,7 +140,7 @@ func CgoOnRtnDepthMarketData(
 	(*goFtdcMdSpi)(
 		(*C.CFtdcMdSpiExt)(this).spi,
 	).callback.OnRtnDepthMarketData(
-		(&CRsaFtdcDepthMarketDataField{}).FromCStruct(pDepthMarketData),
+		GetTick().FromCStruct(pDepthMarketData),
 	)
 }
 
@@ -175,6 +192,25 @@ func CgoOnRspUnSubMarketData(
 		(&CRsaFtdcRspInfoField{}).FromCStruct(pRspInfo),
 		int(nRequestID), bool(bIsLast),
 	)
+}
+
+var (
+	barPool = sync.Pool{New: func() any {
+		return new(CRsaFtdcBarMarketDataField)
+	}}
+)
+
+func GetBar() *CRsaFtdcBarMarketDataField {
+	for {
+		if data := barPool.Get(); data != nil {
+			runtime.SetFinalizer(data, func(v any) {
+				runtime.SetFinalizer(v, nil)
+				barPool.Put(v)
+			})
+
+			return data.(*CRsaFtdcBarMarketDataField)
+		}
+	}
 }
 
 //export CgoOnRtnBarMarketData
@@ -680,6 +716,11 @@ func (api *CFtdcMdApi) ReqBtUnSubMarketData(
 	for idx, sub := range unSubs {
 		ppFields[idx] = sub.ToCStruct()
 	}
+	defer func() {
+		for _, ptr := range ppFields {
+			C.free(unsafe.Pointer(ptr))
+		}
+	}()
 
 	rtn = CheckRtn(C.CallReqBtUnSubMarketData(
 		api.apiPtr.vtable.CFtdcMdApiVtable_ReqBtUnSubMarketData,
@@ -781,7 +822,7 @@ func (api *CFtdcMdApi) ReqQryBarMarketData(
 		bars := make([]*CRsaFtdcBarMarketDataField, outCount)
 
 		for idx, bar := range data[:outCount] {
-			bars[idx].FromCStruct(bar)
+			bars[idx] = GetBar().FromCStruct(bar)
 		}
 
 		return bars, nil
@@ -826,7 +867,7 @@ func (api *CFtdcMdApi) ReqQryDepthMarketData(
 		ticks := make([]*CRsaFtdcDepthMarketDataField, outCount)
 
 		for idx, tick := range data[:outCount] {
-			ticks[idx].FromCStruct(tick)
+			ticks[idx] = GetTick().FromCStruct(tick)
 		}
 
 		return ticks, nil

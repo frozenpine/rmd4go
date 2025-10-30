@@ -5,8 +5,6 @@ package rmd4go
 */
 import "C"
 import (
-	"runtime"
-	"sync"
 	"unsafe"
 )
 
@@ -1054,25 +1052,198 @@ type CRsaFtdcDepthMarketDataField struct {
 }
 
 func (depth *CRsaFtdcDepthMarketDataField) ToCStruct() *C.struct_CRsaFtdcDepthMarketDataField {
-	data := C.struct_CRsaFtdcDepthMarketDataField{}
+	data := (*C.struct_CRsaFtdcDepthMarketDataField)(C.malloc(C.sizeof_struct_CRsaFtdcDepthMarketDataField))
 
 	if depth != nil {
-		C.memcpy(
+		WriteCString(
 			unsafe.Pointer(&data.TradingDay[0]),
-			unsafe.Pointer(unsafe.StringData(depth.TradingDay)),
-			C.sizeof_TRsaFtdcTradingDayType-1,
+			depth.TradingDay, C.sizeof_TRsaFtdcTradingDayType,
 		)
-		// TODO assign values
+		data.PreSettlementPrice = C.TRsaFtdcPriceType(depth.PreSettlementPrice)
+		data.PreClosePrice = C.TRsaFtdcPriceType(depth.PreClosePrice)
+		data.PreOpenInterest = C.TRsaFtdcLargeVolumeType(depth.PreOpenInterest)
+		data.PreDelta = C.TRsaFtdcRatioType(depth.PreDelta)
+		data.OpenPrice = C.TRsaFtdcPriceType(depth.OpenPrice)
+		data.HighestPrice = C.TRsaFtdcPriceType(depth.HighestPrice)
+		data.LowestPrice = C.TRsaFtdcPriceType(depth.LowestPrice)
+		data.UpperLimitPrice = C.TRsaFtdcPriceType(depth.UpperLimitPrice)
+		data.LowerLimitPrice = C.TRsaFtdcPriceType(depth.LowerLimitPrice)
+		data.SettlementPrice = C.TRsaFtdcPriceType(depth.SettlementPrice)
+		data.CurrDelta = C.TRsaFtdcRatioType(depth.CurrDelta)
+		data.LastPrice = C.TRsaFtdcPriceType(depth.LastPrice)
+		data.Volume = C.TRsaFtdcVolumeType(depth.Volume)
+		data.Turnover = C.TRsaFtdcMoneyType(depth.Turnover)
+		data.OpenInterest = C.TRsaFtdcLargeVolumeType(depth.OpenInterest)
+
+		data.BidPrice1 = C.TRsaFtdcPriceType(depth.BidPrice1)
+		data.BidVolume1 = C.TRsaFtdcVolumeType(depth.BidVolume1)
+		data.AskPrice1 = C.TRsaFtdcPriceType(depth.AskPrice1)
+		data.AskVolume1 = C.TRsaFtdcVolumeType(depth.AskVolume1)
+
+		data.BidPrice2 = C.TRsaFtdcPriceType(depth.BidPrice2)
+		data.BidVolume2 = C.TRsaFtdcVolumeType(depth.BidVolume2)
+		data.AskPrice2 = C.TRsaFtdcPriceType(depth.AskPrice2)
+		data.AskVolume2 = C.TRsaFtdcVolumeType(depth.AskVolume2)
+
+		data.BidPrice3 = C.TRsaFtdcPriceType(depth.BidPrice3)
+		data.BidVolume3 = C.TRsaFtdcVolumeType(depth.BidVolume3)
+		data.AskPrice3 = C.TRsaFtdcPriceType(depth.AskPrice3)
+		data.AskVolume3 = C.TRsaFtdcVolumeType(depth.AskVolume3)
+
+		data.BidPrice4 = C.TRsaFtdcPriceType(depth.BidPrice4)
+		data.BidVolume4 = C.TRsaFtdcVolumeType(depth.BidVolume4)
+		data.AskPrice4 = C.TRsaFtdcPriceType(depth.AskPrice4)
+		data.AskVolume4 = C.TRsaFtdcVolumeType(depth.AskVolume4)
+
+		data.BidPrice5 = C.TRsaFtdcPriceType(depth.BidPrice5)
+		data.BidVolume5 = C.TRsaFtdcVolumeType(depth.BidVolume5)
+		data.AskPrice5 = C.TRsaFtdcPriceType(depth.AskPrice5)
+		data.AskVolume5 = C.TRsaFtdcVolumeType(depth.AskVolume5)
+
+		data.BidPrice6 = C.TRsaFtdcPriceType(depth.BidPrice6)
+		data.BidVolume6 = C.TRsaFtdcVolumeType(depth.BidVolume6)
+		data.AskPrice6 = C.TRsaFtdcPriceType(depth.AskPrice6)
+		data.AskVolume6 = C.TRsaFtdcVolumeType(depth.AskVolume6)
+
+		data.BidPrice7 = C.TRsaFtdcPriceType(depth.BidPrice7)
+		data.BidVolume7 = C.TRsaFtdcVolumeType(depth.BidVolume7)
+		data.AskPrice7 = C.TRsaFtdcPriceType(depth.AskPrice7)
+		data.AskVolume7 = C.TRsaFtdcVolumeType(depth.AskVolume7)
+
+		data.BidPrice8 = C.TRsaFtdcPriceType(depth.BidPrice8)
+		data.BidVolume8 = C.TRsaFtdcVolumeType(depth.BidVolume8)
+		data.AskPrice8 = C.TRsaFtdcPriceType(depth.AskPrice8)
+		data.AskVolume8 = C.TRsaFtdcVolumeType(depth.AskVolume8)
+
+		data.BidPrice9 = C.TRsaFtdcPriceType(depth.BidPrice9)
+		data.BidVolume9 = C.TRsaFtdcVolumeType(depth.BidVolume9)
+		data.AskPrice9 = C.TRsaFtdcPriceType(depth.AskPrice9)
+		data.AskVolume9 = C.TRsaFtdcVolumeType(depth.AskVolume9)
+
+		data.BidPrice10 = C.TRsaFtdcPriceType(depth.BidPrice10)
+		data.BidVolume10 = C.TRsaFtdcVolumeType(depth.BidVolume10)
+		data.AskPrice10 = C.TRsaFtdcPriceType(depth.AskPrice10)
+		data.AskVolume10 = C.TRsaFtdcVolumeType(depth.AskVolume10)
+
+		WriteCString(
+			unsafe.Pointer(&data.InstrumentID[0]),
+			depth.InstrumentID, C.sizeof_TRsaFtdcInstrumentIDType,
+		)
+		WriteCString(
+			unsafe.Pointer(&data.UpdateTime[0]),
+			depth.UpdateTime, C.sizeof_TRsaFtdcTimeType,
+		)
+		data.UpdateMillisec = C.TRsaFtdcMillisecType(depth.UpdateMillisec)
+		WriteCString(
+			unsafe.Pointer(&data.ExchangeID[0]),
+			depth.ExchangeID, C.sizeof_TRsaFtdcExchangeIDType,
+		)
+
+		data.VolumeAskLot = C.TRsaFtdcVolumeType(depth.VolumeAskLot)
+		data.VolumeBidLot = C.TRsaFtdcVolumeType(depth.VolumeBidLot)
+		data.InstrumentStatus = C.TRsaFtdcInstrumentStatusType(depth.InstrumentStatus)
+
+		WriteCString(
+			unsafe.Pointer(&data.CalendarDate[0]),
+			depth.CalendarDate, C.sizeof_TRsaFtdcTradingDayType,
+		)
+		data.PacketNo = C.TRsaFtdcPacketNoType(depth.PacketNo)
+		data.InstrumentNo = C.TRsaFtdcNumberType(depth.InstrumentNo)
+		data.DataCenterID = C.TRsaFtdcDataCenterIDType(depth.DataCenterID)
+		data.UpdateTs = C.TRsaFtdcInt64Type(depth.UpdateTs)
+		data.LastTraded = C.TRsaFtdcVolumeType(depth.LastTraded)
+		data.LastTurnover = C.TRsaFtdcMoneyType(depth.LastTurnover)
 	}
 
-	return &data
+	return data
 }
 
 func (depth *CRsaFtdcDepthMarketDataField) FromCStruct(
 	v *C.struct_CRsaFtdcDepthMarketDataField,
 ) *CRsaFtdcDepthMarketDataField {
 	if depth != nil && v != nil {
-		// TODO assign values
+		depth.TradingDay = C.GoString(&v.TradingDay[0])
+		depth.PreSettlementPrice = float64(v.PreSettlementPrice)
+		depth.PreClosePrice = float64(v.PreClosePrice)
+		depth.PreOpenInterest = float64(v.PreOpenInterest)
+		depth.PreDelta = float64(v.PreDelta)
+		depth.OpenPrice = float64(v.OpenPrice)
+		depth.HighestPrice = float64(v.HighestPrice)
+		depth.LowestPrice = float64(v.LowestPrice)
+		depth.ClosePrice = float64(v.ClosePrice)
+		depth.UpperLimitPrice = float64(v.UpperLimitPrice)
+		depth.LowerLimitPrice = float64(v.LowerLimitPrice)
+		depth.SettlementPrice = float64(v.SettlementPrice)
+		depth.CurrDelta = float64(v.CurrDelta)
+		depth.LastPrice = float64(v.LastPrice)
+		depth.Volume = float64(v.Volume)
+		depth.Turnover = float64(v.Turnover)
+		depth.OpenInterest = float64(v.OpenInterest)
+
+		depth.BidPrice1 = float64(v.BidPrice1)
+		depth.BidVolume1 = float64(v.BidVolume1)
+		depth.AskPrice1 = float64(v.AskPrice1)
+		depth.AskVolume1 = float64(v.AskVolume1)
+
+		depth.BidPrice2 = float64(v.BidPrice2)
+		depth.BidVolume2 = float64(v.BidVolume2)
+		depth.AskPrice2 = float64(v.AskPrice2)
+		depth.AskVolume2 = float64(v.AskVolume2)
+
+		depth.BidPrice3 = float64(v.BidPrice3)
+		depth.BidVolume3 = float64(v.BidVolume3)
+		depth.AskPrice3 = float64(v.AskPrice3)
+		depth.AskVolume3 = float64(v.AskVolume3)
+
+		depth.BidPrice4 = float64(v.BidPrice4)
+		depth.BidVolume4 = float64(v.BidVolume4)
+		depth.AskPrice4 = float64(v.AskPrice4)
+		depth.AskVolume4 = float64(v.AskVolume4)
+
+		depth.BidPrice5 = float64(v.BidPrice5)
+		depth.BidVolume5 = float64(v.BidVolume5)
+		depth.AskPrice5 = float64(v.AskPrice5)
+		depth.AskVolume5 = float64(v.AskVolume5)
+
+		depth.BidPrice6 = float64(v.BidPrice6)
+		depth.BidVolume6 = float64(v.BidVolume6)
+		depth.AskPrice6 = float64(v.AskPrice6)
+		depth.AskVolume6 = float64(v.AskVolume6)
+
+		depth.BidPrice7 = float64(v.BidPrice7)
+		depth.BidVolume7 = float64(v.BidVolume7)
+		depth.AskPrice7 = float64(v.AskPrice7)
+		depth.AskVolume7 = float64(v.AskVolume7)
+
+		depth.BidPrice8 = float64(v.BidPrice8)
+		depth.BidVolume8 = float64(v.BidVolume8)
+		depth.AskPrice8 = float64(v.AskPrice8)
+		depth.AskVolume8 = float64(v.AskVolume8)
+
+		depth.BidPrice9 = float64(v.BidPrice9)
+		depth.BidVolume9 = float64(v.BidVolume9)
+		depth.AskPrice9 = float64(v.AskPrice9)
+		depth.AskVolume9 = float64(v.AskVolume9)
+
+		depth.BidPrice10 = float64(v.BidPrice10)
+		depth.BidVolume10 = float64(v.BidVolume10)
+		depth.AskPrice10 = float64(v.AskPrice10)
+		depth.AskVolume10 = float64(v.AskVolume10)
+
+		depth.InstrumentID = C.GoString(&v.InstrumentID[0])
+		depth.UpdateTime = C.GoString(&v.UpdateTime[0])
+		depth.UpdateMillisec = int(v.UpdateMillisec)
+		depth.ExchangeID = C.GoString(&v.ExchangeID[0])
+		depth.VolumeAskLot = float64(v.VolumeAskLot)
+		depth.VolumeBidLot = float64(v.VolumeBidLot)
+		depth.InstrumentStatus = TRsaFtdcInstrumentStatusType(v.InstrumentStatus)
+		depth.CalendarDate = C.GoString(&v.CalendarDate[0])
+		depth.PacketNo = int(v.PacketNo)
+		depth.InstrumentNo = int(v.InstrumentNo)
+		depth.DataCenterID = int(v.DataCenterID)
+		depth.UpdateTs = int64(v.UpdateTs)
+		depth.LastTraded = float64(v.LastTraded)
+		depth.LastTurnover = float64(v.LastTurnover)
 	}
 
 	return depth
@@ -1247,25 +1418,6 @@ type CRsaFtdcMarketDataAskBid10Field struct {
 type CRsaFtdcMarketDataInstrumentStatusField struct {
 	// 合约状态
 	InstrumentStatus TRsaFtdcInstrumentStatusType
-}
-
-var (
-	barPool = sync.Pool{New: func() any {
-		return new(CRsaFtdcBarMarketDataField)
-	}}
-)
-
-func GetBar() *CRsaFtdcBarMarketDataField {
-	for {
-		if data := barPool.Get(); data != nil {
-			runtime.SetFinalizer(data, func(v any) {
-				runtime.SetFinalizer(v, nil)
-				barPool.Put(v)
-			})
-
-			return data.(*CRsaFtdcBarMarketDataField)
-		}
-	}
 }
 
 // Bar行情
