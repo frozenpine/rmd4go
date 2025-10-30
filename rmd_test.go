@@ -16,21 +16,21 @@ type TestSpi struct {
 	wait chan bool
 }
 
-func (c TestSpi) OnMdFrontConnected() {
+func (c *TestSpi) OnMdFrontConnected() {
 	slog.Info("front connected")
 	if c.wait != nil {
 		c.wait <- true
 	}
 }
 
-func (c TestSpi) OnMdFrontDisconnected(reason int) {
+func (c *TestSpi) OnMdFrontDisconnected(reason int) {
 	slog.Info("front disconnected", slog.Int("reason", reason))
 	if c.wait != nil {
 		c.wait <- false
 	}
 }
 
-func (c TestSpi) OnMdRspUserLogin(
+func (c *TestSpi) OnMdRspUserLogin(
 	login *rmd4go.CRsaFtdcRspUserLoginField,
 	info *rmd4go.CRsaFtdcRspInfoField,
 	requestID int, isLast bool,
@@ -62,11 +62,11 @@ func (c TestSpi) OnMdRspUserLogin(
 	}
 }
 
-func (c TestSpi) OnRtnDepthMarketData(tick *rmd4go.CRsaFtdcDepthMarketDataField) {
+func (c *TestSpi) OnRtnDepthMarketData(tick *rmd4go.CRsaFtdcDepthMarketDataField) {
 	slog.Info("on rtn tick", slog.Any("tick", tick))
 }
 
-func (c TestSpi) OnRspSubMarketData(
+func (c *TestSpi) OnRspSubMarketData(
 	instrument *rmd4go.CRsaFtdcSpecificInstrumentField,
 	info *rmd4go.CRsaFtdcRspInfoField,
 	requestID int, isLast bool,
@@ -98,7 +98,7 @@ func (c TestSpi) OnRspSubMarketData(
 	}
 }
 
-func (c TestSpi) OnRspUnSubMarketData(
+func (c *TestSpi) OnRspUnSubMarketData(
 	instrument *rmd4go.CRsaFtdcSpecificInstrumentField,
 	info *rmd4go.CRsaFtdcRspInfoField,
 	requestID int, isLast bool,
@@ -129,11 +129,11 @@ func (c TestSpi) OnRspUnSubMarketData(
 	}
 }
 
-func (c TestSpi) OnRtnBarMarketData(bar *rmd4go.CRsaFtdcBarMarketDataField) {
+func (c *TestSpi) OnRtnBarMarketData(bar *rmd4go.CRsaFtdcBarMarketDataField) {
 	slog.Info("on rtn bar", slog.Any("bar", bar))
 }
 
-func (c TestSpi) OnRspQryMarketData(
+func (c *TestSpi) OnRspQryMarketData(
 	md *rmd4go.CRsaFtdcRspMarketDataField,
 	info *rmd4go.CRsaFtdcRspInfoField,
 	requestID int, isLast bool,
@@ -165,7 +165,7 @@ func (c TestSpi) OnRspQryMarketData(
 	}
 }
 
-func (c TestSpi) OnRtnMarketDataEnd(dt *rmd4go.CRsaFtdcNtfMarketDataEndField) {
+func (c *TestSpi) OnRtnMarketDataEnd(dt *rmd4go.CRsaFtdcNtfMarketDataEndField) {
 	slog.Info("on rtn md data end", slog.Any("date", dt))
 }
 
@@ -208,7 +208,7 @@ func TestApiSpi(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	api.RegisterSpi(spi)
+	api.RegisterSpi(&spi)
 
 	t.Log("rmd spi registered")
 
@@ -305,8 +305,8 @@ func TestChannelSpi(t *testing.T) {
 
 	wait := make(chan bool)
 
-	spi, err := rmd4go.NewChannelSpi[TestSpi](ctx, 100, func(ts *TestSpi) error {
-		ts.wait = wait
+	spi, err := rmd4go.NewChannelSpi[*TestSpi](ctx, 100, func(ts **TestSpi) error {
+		*ts = &TestSpi{wait: wait}
 		return nil
 	})
 	if err != nil {
