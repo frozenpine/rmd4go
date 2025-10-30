@@ -3,15 +3,14 @@
 
 #include "helper.h"
 
-typedef struct {
-	CFtdcMdSpiVtable* vtable;
-} CFtdcMdSpiExt;
-
-
-const char* CREATE_RMD_API_WIN = "?CreateFtdcMdApi@CFtdcMdApi@@SAPEAV1@PEBD00_N@Z";
-const char* CREATE_RMD_API_LIN = "_ZN10CFtdcMdApi15CreateFtdcMdApiEPKcS1_S1_b";
-// const char* LIB_PATH = "../dependencies/libs/rmdapi.dll";
+#ifdef _WIN32
+const char* CREATE_RMD_API = "?CreateFtdcMdApi@CFtdcMdApi@@SAPEAV1@PEBD00_N@Z";
+const char* LIB_PATH = "../dependencies/libs/rmdapi.dll";
+#else
+const char* CREATE_RMD_API = "_ZN10CFtdcMdApi15CreateFtdcMdApiEPKcS1_S1_b";
 const char* LIB_PATH = "../dependencies/libs/rmdapi.so";
+#endif
+
 const char* FRONT_ADDR = "tcp://172.16.200.105:30010";
 const char* FLOW_PATH = "./flow/";
 
@@ -75,14 +74,13 @@ int main(int argc, char** argv)
         fprintf(stdout, "lib[%s] opened\n", LIB_PATH);
     }
 
-    // CreateFtdcMdApi creator = dlsym(lib, CREATE_RMD_API_WIN);
-    CreateFtdcMdApi creator = dlsym(lib, CREATE_RMD_API_LIN);
+    CreateFtdcMdApi creator = dlsym(lib, CREATE_RMD_API);
     if (NULL == creator) {
-        fprintf(stderr, "api creator[%s] not found: %s\n", CREATE_RMD_API_WIN, dlerror());
+        fprintf(stderr, "api creator[%s] not found: %s\n", CREATE_RMD_API, dlerror());
         dlclose(lib);
         return -1;
     } else {
-        fprintf(stdout, "creator[%s] found in lib\n", CREATE_RMD_API_WIN);
+        fprintf(stdout, "creator[%s] found in lib\n", CREATE_RMD_API);
     }
 
     CFtdcMdApiExt* api = creator(FRONT_ADDR, FLOW_PATH, "c demo", false);
@@ -94,7 +92,7 @@ int main(int argc, char** argv)
         fprintf(stdout, "api instance created: %x\n", api);
     }
 
-    CFtdcMdApiExt* spi = malloc(sizeof(CFtdcMdSpiExt));
+    CFtdcMdSpiExt* spi = malloc(sizeof(CFtdcMdSpiExt));
     spi->vtable = SPI_VTABLE;
 
     api->vtable->CFtdcMdApiVtable_RegisterSpi(api, spi);

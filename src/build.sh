@@ -1,1 +1,0 @@
-gcc main.c ../helper.c -o testdemo -I.. -I../dependencies/includes -ldl
