@@ -1,11 +1,30 @@
 package rmd4go
 
+/*
+#include "helper.h"
+*/
+import "C"
+import (
+	"runtime"
+	"sync"
+	"unsafe"
+)
+
 // 响应信息
 type CRsaFtdcRspInfoField struct {
 	// 错误代码
 	ErrorID int
 	// 错误信息
 	ErrorMsg string
+}
+
+func (rspInfo *CRsaFtdcRspInfoField) FromCStruct(v *C.struct_CRsaFtdcRspInfoField) *CRsaFtdcRspInfoField {
+	if rspInfo != nil && v != nil {
+		rspInfo.ErrorID = int(v.ErrorID)
+		rspInfo.ErrorMsg = ReadCString([]byte(C.GoString(&v.ErrorMsg[0])))
+	}
+
+	return rspInfo
 }
 
 // 系统用户登录请求
@@ -42,6 +61,25 @@ type CRsaFtdcReqUserLoginField struct {
 	ClientSystemInfo string
 }
 
+func (reqLogin *CRsaFtdcReqUserLoginField) ToCStruct() *C.struct_CRsaFtdcReqUserLoginField {
+	req := C.struct_CRsaFtdcReqUserLoginField{}
+
+	if reqLogin != nil {
+		WriteCString(
+			unsafe.Pointer(&req.BrokerID[0]),
+			reqLogin.BrokerID, C.sizeof_TRsaFtdcBrokerIDType,
+		)
+		WriteCString(
+			unsafe.Pointer(&req.UserID[0]),
+			reqLogin.UserID, C.sizeof_TRsaFtdcUserIDType)
+		WriteCString(
+			unsafe.Pointer(&req.Password[0]),
+			reqLogin.Password, C.sizeof_TRsaFtdcPasswordType)
+	}
+
+	return &req
+}
+
 // 系统用户登录应答
 type CRsaFtdcRspUserLoginField struct {
 	// 交易日
@@ -68,6 +106,27 @@ type CRsaFtdcRspUserLoginField struct {
 	SessionID int
 	// 前置编号
 	FrontID int
+}
+
+func (rspLogin *CRsaFtdcRspUserLoginField) FromCStruct(
+	v *C.struct_CRsaFtdcRspUserLoginField,
+) *CRsaFtdcRspUserLoginField {
+	if rspLogin != nil && v != nil {
+		rspLogin.TradingDay = C.GoString(&v.TradingDay[0])
+		rspLogin.BrokerID = C.GoString(&v.BrokerID[0])
+		rspLogin.UserID = C.GoString(&v.UserID[0])
+		rspLogin.LoginTime = C.GoString(&v.LoginTime[0])
+		rspLogin.MaxOrderLocalID = C.GoString(&v.MaxOrderLocalID[0])
+		rspLogin.TradingSystemName = C.GoString(&v.TradingSystemName[0])
+		rspLogin.DataCenterID = int(v.DataCenterID)
+		rspLogin.PrivateFlowSize = int(v.PrivateFlowSize)
+		rspLogin.UserFlowSize = int(v.UserFlowSize)
+		rspLogin.LoginInfo = C.GoString(&v.LoginInfo[0])
+		rspLogin.SessionID = int(v.SessionID)
+		rspLogin.FrontID = int(v.FrontID)
+	}
+
+	return rspLogin
 }
 
 // 用户登出请求
@@ -994,12 +1053,48 @@ type CRsaFtdcDepthMarketDataField struct {
 	LastTurnover float64
 }
 
+func (depth *CRsaFtdcDepthMarketDataField) ToCStruct() *C.struct_CRsaFtdcDepthMarketDataField {
+	data := C.struct_CRsaFtdcDepthMarketDataField{}
+
+	if depth != nil {
+		C.memcpy(
+			unsafe.Pointer(&data.TradingDay[0]),
+			unsafe.Pointer(unsafe.StringData(depth.TradingDay)),
+			C.sizeof_TRsaFtdcTradingDayType-1,
+		)
+		// TODO assign values
+	}
+
+	return &data
+}
+
+func (depth *CRsaFtdcDepthMarketDataField) FromCStruct(
+	v *C.struct_CRsaFtdcDepthMarketDataField,
+) *CRsaFtdcDepthMarketDataField {
+	if depth != nil && v != nil {
+		// TODO assign values
+	}
+
+	return depth
+}
+
 // 订阅合约的相关信息
 type CRsaFtdcSpecificInstrumentField struct {
 	// 交易所代码
 	ExchangeID string
 	// 合约代码
 	InstrumentID string
+}
+
+func (rspIns *CRsaFtdcSpecificInstrumentField) FromCStruct(
+	v *C.struct_CRsaFtdcSpecificInstrumentField,
+) *CRsaFtdcSpecificInstrumentField {
+	if rspIns != nil && v != nil {
+		rspIns.ExchangeID = C.GoString(&v.ExchangeID[0])
+		rspIns.InstrumentID = C.GoString(&v.InstrumentID[0])
+	}
+
+	return rspIns
 }
 
 // 投资者权限
@@ -1154,6 +1249,25 @@ type CRsaFtdcMarketDataInstrumentStatusField struct {
 	InstrumentStatus TRsaFtdcInstrumentStatusType
 }
 
+var (
+	barPool = sync.Pool{New: func() any {
+		return new(CRsaFtdcBarMarketDataField)
+	}}
+)
+
+func GetBar() *CRsaFtdcBarMarketDataField {
+	for {
+		if data := barPool.Get(); data != nil {
+			runtime.SetFinalizer(data, func(v any) {
+				runtime.SetFinalizer(v, nil)
+				barPool.Put(v)
+			})
+
+			return data.(*CRsaFtdcBarMarketDataField)
+		}
+	}
+}
+
 // Bar行情
 type CRsaFtdcBarMarketDataField struct {
 	// 交易日
@@ -1196,6 +1310,79 @@ type CRsaFtdcBarMarketDataField struct {
 	Turnover float64
 	// 最新成交额
 	LastTurnover float64
+}
+
+func (bar *CRsaFtdcBarMarketDataField) ToCStruct() *C.struct_CRsaFtdcBarMarketDataField {
+	data := C.struct_CRsaFtdcBarMarketDataField{}
+
+	if bar != nil {
+		C.memcpy(
+			unsafe.Pointer(&data.TradingDay[0]),
+			unsafe.Pointer(unsafe.StringData(bar.TradingDay)),
+			C.sizeof_TRsaFtdcTradingDayType-1,
+		)
+		C.memcpy(
+			unsafe.Pointer(&data.ExchangeID[0]),
+			unsafe.Pointer(unsafe.StringData(bar.ExchangeID)),
+			C.sizeof_TRsaFtdcExchangeIDType-1,
+		)
+		C.memcpy(
+			unsafe.Pointer(&data.InstrumentID[0]),
+			unsafe.Pointer(unsafe.StringData(bar.InstrumentID)),
+			C.sizeof_TRsaFtdcInstrumentIDType-1,
+		)
+		data.BarPreces = C.TRsaFtdcBarPrecesType(bar.BarPreces)
+		data.BarPeriod = C.TRsaFtdcNumberType(bar.BarPeriod)
+		data.BarTime = C.TRsaFtdcInt64Type(bar.BarTime)
+		data.UpdateTs = C.TRsaFtdcInt64Type(bar.UpdateTs)
+		C.memcpy(
+			unsafe.Pointer(&data.UpdateTime[0]),
+			unsafe.Pointer(unsafe.StringData(bar.UpdateTime)),
+			C.sizeof_TRsaFtdcTimeType-1,
+		)
+		data.UpdateMillisec = C.TRsaFtdcMillisecType(bar.UpdateMillisec)
+		data.HighestPrice = C.TRsaFtdcPriceType(bar.HighestPrice)
+		data.LowestPrice = C.TRsaFtdcPriceType(bar.LowestPrice)
+		data.Open = C.TRsaFtdcPriceType(bar.Open)
+		data.High = C.TRsaFtdcPriceType(bar.High)
+		data.Low = C.TRsaFtdcPriceType(bar.Low)
+		data.Close = C.TRsaFtdcPriceType(bar.Close)
+		data.Volume = C.TRsaFtdcVolumeType(bar.Volume)
+		data.LastTraded = C.TRsaFtdcVolumeType(bar.LastTraded)
+		data.OpenInterest = C.TRsaFtdcLargeVolumeType(bar.OpenInterest)
+		data.Turnover = C.TRsaFtdcMoneyType(bar.Turnover)
+		data.LastTurnover = C.TRsaFtdcMoneyType(bar.LastTurnover)
+	}
+
+	return &data
+}
+
+func (bar *CRsaFtdcBarMarketDataField) FromCStruct(
+	v *C.struct_CRsaFtdcBarMarketDataField,
+) *CRsaFtdcBarMarketDataField {
+	if bar != nil && v != nil {
+		bar.TradingDay = C.GoString(&v.TradingDay[0])
+		bar.ExchangeID = C.GoString(&v.ExchangeID[0])
+		bar.InstrumentID = C.GoString(&v.InstrumentID[0])
+		bar.BarPreces = TRsaFtdcBarPrecesType(v.BarPreces)
+		bar.BarPeriod = int(v.BarPeriod)
+		bar.BarTime = int64(v.BarTime)
+		bar.UpdateTs = int64(v.UpdateTs)
+		bar.UpdateMillisec = int(v.UpdateMillisec)
+		bar.HighestPrice = float64(v.HighestPrice)
+		bar.LowestPrice = float64(v.LowestPrice)
+		bar.Open = float64(v.Open)
+		bar.High = float64(v.High)
+		bar.Low = float64(v.Low)
+		bar.Close = float64(v.Close)
+		bar.Volume = float64(v.Volume)
+		bar.LastTraded = float64(v.LastTraded)
+		bar.OpenInterest = float64(v.OpenInterest)
+		bar.Turnover = float64(v.Turnover)
+		bar.LastTurnover = float64(v.LastTurnover)
+	}
+
+	return bar
 }
 
 // 查询Bar行情请求
@@ -2552,6 +2739,23 @@ type CRsaFtdcQryMarketDataField struct {
 	InstrumentID string
 }
 
+func (qryMd *CRsaFtdcQryMarketDataField) ToCStruct() *C.struct_CRsaFtdcQryMarketDataField {
+	req := C.struct_CRsaFtdcQryMarketDataField{}
+
+	if qryMd != nil {
+		WriteCString(
+			unsafe.Pointer(&req.ExchangeID[0]),
+			qryMd.ExchangeID, C.sizeof_TRsaFtdcExchangeIDType,
+		)
+		WriteCString(
+			unsafe.Pointer(&req.InstrumentID[0]),
+			qryMd.InstrumentID, C.sizeof_TRsaFtdcInstrumentIDType,
+		)
+	}
+
+	return &req
+}
+
 // 行情应答
 type CRsaFtdcRspMarketDataField struct {
 	// 交易所代码
@@ -2606,6 +2810,16 @@ type CRsaFtdcRspMarketDataField struct {
 	UpdateMillisec int
 	// 合约状态
 	InstrumentStatus TRsaFtdcInstrumentStatusType
+}
+
+func (rspMd *CRsaFtdcRspMarketDataField) FromCStruct(
+	v *C.struct_CRsaFtdcRspMarketDataField,
+) *CRsaFtdcRspMarketDataField {
+	if rspMd != nil && v != nil {
+		// TODO assign values
+	}
+
+	return rspMd
 }
 
 // 产品查询
@@ -3984,6 +4198,18 @@ type CRsaFtdcNtfMarketDataEndField struct {
 	Time string
 }
 
+func (rtnMdEnd *CRsaFtdcNtfMarketDataEndField) FromCStruct(
+	v *C.struct_CRsaFtdcNtfMarketDataEndField,
+) *CRsaFtdcNtfMarketDataEndField {
+	if rtnMdEnd != nil && v != nil {
+		rtnMdEnd.StartTradingDay = C.GoString(&v.StartTradingDay[0])
+		rtnMdEnd.EndTradingDay = C.GoString(&v.EndTradingDay[0])
+		rtnMdEnd.Time = C.GoString(&v.Time[0])
+	}
+
+	return rtnMdEnd
+}
+
 // 回测行情订阅
 type CRsaFtdcBtSubMarketDataField struct {
 	// 交易所代码
@@ -3994,6 +4220,26 @@ type CRsaFtdcBtSubMarketDataField struct {
 	BarPreces TRsaFtdcBarPrecesType
 	// Bar周期
 	BarPeriod int
+}
+
+func (btSub *CRsaFtdcBtSubMarketDataField) ToCStruct() *C.struct_CRsaFtdcBtSubMarketDataField {
+	data := (*C.struct_CRsaFtdcBtSubMarketDataField)(C.malloc(C.sizeof_struct_CRsaFtdcBtSubMarketDataField))
+
+	if btSub != nil {
+		WriteCString(
+			unsafe.Pointer(&data.ExchangeID[0]),
+			btSub.ExchangeID, C.sizeof_TRsaFtdcExchangeIDType,
+		)
+		WriteCString(
+			unsafe.Pointer(&data.InstrumentID[0]),
+			btSub.InstrumentID, C.sizeof_TRsaFtdcInstrumentIDType,
+		)
+
+		data.BarPreces = C.TRsaFtdcBarPrecesType(btSub.BarPreces)
+		data.BarPeriod = C.TRsaFtdcNumberType(btSub.BarPeriod)
+	}
+
+	return data
 }
 
 // 主力合约信息查询请求
@@ -4112,6 +4358,16 @@ type CRsaFtdcSubCombMarketDataField struct {
 	BarPreces TRsaFtdcBarPrecesType
 	// Bar周期
 	BarPeriod int
+}
+
+func (comboSub *CRsaFtdcSubCombMarketDataField) ToCStruct() *C.struct_CRsaFtdcSubCombMarketDataField {
+	data := C.struct_CRsaFtdcSubCombMarketDataField{}
+
+	if comboSub != nil {
+		// TODO assign values
+	}
+
+	return &data
 }
 
 // 流水状态

@@ -1,9 +1,14 @@
 package rmd4go
 
+/*
+#include "helper.h"
+*/
+import "C"
 import (
 	"bytes"
 	"io"
 	"log/slog"
+	"unsafe"
 
 	"golang.org/x/text/encoding/simplifiedchinese"
 	"golang.org/x/text/transform"
@@ -47,4 +52,17 @@ func ReadCString(buff []uint8) string {
 	} else {
 		return string(decoded)
 	}
+}
+
+func WriteCString(dst unsafe.Pointer, value string, len C.size_t) {
+	if value == "" {
+		return
+	}
+
+	buffer := []byte(value)
+
+	ptr := unsafe.Pointer(&buffer[0])
+
+	C.memset(dst, 0, len)
+	C.memcpy(dst, ptr, len-1)
 }

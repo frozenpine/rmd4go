@@ -1,6 +1,7 @@
 package rmd4go_test
 
 import (
+	"log/slog"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -43,8 +44,7 @@ func (c *TestClient) OnMdRspUserLogin(
 
 	if login != nil {
 		c.t.Logf(
-			"user login: %s.%s @ %s",
-			login.BrokerID, login.UserID, login.LoginTime,
+			"user login: %+v", login,
 		)
 	}
 
@@ -52,8 +52,7 @@ func (c *TestClient) OnMdRspUserLogin(
 }
 
 func (c *TestClient) OnRtnDepthMarketData(tick *rmd4go.CRsaFtdcDepthMarketDataField) {
-	// TODO: print tick data
-	c.t.Log("on rtn tick: ")
+	c.t.Logf("on rtn tick: %+v", tick)
 }
 
 func (c *TestClient) OnRspSubMarketData(
@@ -99,9 +98,7 @@ func (c *TestClient) OnRspUnSubMarketData(
 
 	if instrument != nil {
 		c.t.Logf(
-			"market data un-subscribed: %s.%s",
-			instrument.ExchangeID,
-			instrument.InstrumentID,
+			"market data un-subscribed: %+v", instrument,
 		)
 	}
 
@@ -111,8 +108,7 @@ func (c *TestClient) OnRspUnSubMarketData(
 }
 
 func (c *TestClient) OnRtnBarMarketData(bar *rmd4go.CRsaFtdcBarMarketDataField) {
-	// TODO: bar data print
-	c.t.Log("on rtn bar: ")
+	c.t.Logf("on rtn bar: %+v", bar)
 }
 
 func (c *TestClient) OnRspQryMarketData(
@@ -131,8 +127,7 @@ func (c *TestClient) OnRspQryMarketData(
 
 	if md != nil {
 		c.t.Logf(
-			"market data un-subscribed: %s.%s",
-			md.ExchangeID, md.InstrumentID,
+			"market data un-subscribed: %+v", md,
 		)
 	}
 
@@ -142,10 +137,11 @@ func (c *TestClient) OnRspQryMarketData(
 }
 
 func (c *TestClient) OnRtnMarketDataEnd(td *rmd4go.CRsaFtdcNtfMarketDataEndField) {
-	c.t.Log("on rtn md data end: ")
+	c.t.Logf("on rtn md data end: %+v", td)
 }
 
 func TestApiSpi(t *testing.T) {
+	slog.SetLogLoggerLevel(slog.LevelDebug - 1)
 	var (
 		err       error
 		libPath   = "./dependencies/libs"
@@ -202,9 +198,29 @@ func TestApiSpi(t *testing.T) {
 		}
 	}
 
-	if err := api.ReqUserLogin(&rmd4go.CRsaFtdcReqUserLoginField{}); err != nil {
+	if err := api.ReqUserLogin(&rmd4go.CRsaFtdcReqUserLoginField{
+		BrokerID: "rdrk",
+		UserID:   "test",
+		Password: "test",
+	}); err != nil {
 		t.Fatalf("req login failed: %+v", err)
 	} else {
 		<-api.wait
 	}
+
+	api.ReqBtSubMarketData(&rmd4go.CRsaFtdcBtSubMarketDataField{
+		ExchangeID:   "CFFEX",
+		InstrumentID: "IC2512",
+	})
+	<-api.wait
+	// api.ReqSubMarketData("IC2512")
+	// <-api.wait
+
+	// api.ReqQryMarketData(&rmd4go.CRsaFtdcQryMarketDataField{
+	// 	ExchangeID:   "CFFEX",
+	// 	InstrumentID: "IC2512",
+	// })
+	// <-api.wait
+
+	<-time.After(time.Second * 20)
 }

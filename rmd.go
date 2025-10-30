@@ -72,6 +72,13 @@ func CgoOnMdFrontConnected(this unsafe.Pointer) {
 
 //export CgoOnMdFrontDisconnected
 func CgoOnMdFrontDisconnected(this unsafe.Pointer, nReason C.int) {
+	slog.Log(
+		context.Background(), slog.LevelDebug-1,
+		"rmd CgoOnMdFrontDisconnected called",
+		slog.Any("spi", this),
+		slog.Any("reason", nReason),
+	)
+
 	(*goFtdcMdSpi)(
 		(*C.CFtdcMdSpiExt)(this).spi,
 	).callback.OnMdFrontDisconnected(int(nReason))
@@ -84,16 +91,21 @@ func CgoOnMdRspUserLogin(
 	pRspInfo *C.struct_CRsaFtdcRspInfoField,
 	nRequestID C.int, bIsLast C.bool,
 ) {
-	rsp := CRsaFtdcRspUserLoginField{}
-	rsp.TradingDay = C.GoString(&pRspUserLogin.TradingDay[0])
-	info := CRsaFtdcRspInfoField{}
-	info.ErrorID = int(pRspInfo.ErrorID)
-	info.ErrorMsg = ReadCString([]byte(C.GoString(&pRspInfo.ErrorMsg[0])))
-
+	slog.Log(
+		context.Background(), slog.LevelDebug-1,
+		"rmd CgoOnMdRspUserLogin called",
+		slog.Any("spi", this),
+		slog.Any("login", pRspUserLogin),
+		slog.Any("info", pRspInfo),
+		slog.Int("req", int(nRequestID)),
+		slog.Bool("last", bool(bIsLast)),
+	)
 	(*goFtdcMdSpi)(
 		(*C.CFtdcMdSpiExt)(this).spi,
 	).callback.OnMdRspUserLogin(
-		&rsp, &info, int(nRequestID), bool(bIsLast),
+		(&CRsaFtdcRspUserLoginField{}).FromCStruct(pRspUserLogin),
+		(&CRsaFtdcRspInfoField{}).FromCStruct(pRspInfo),
+		int(nRequestID), bool(bIsLast),
 	)
 }
 
@@ -102,10 +114,17 @@ func CgoOnRtnDepthMarketData(
 	this unsafe.Pointer,
 	pDepthMarketData *C.struct_CRsaFtdcDepthMarketDataField,
 ) {
+	slog.Log(
+		context.Background(), slog.LevelDebug-2,
+		"rmd CgoOnRtnDepthMarketData called",
+		slog.Any("spi", this),
+		slog.Any("depth", pDepthMarketData),
+	)
 	(*goFtdcMdSpi)(
 		(*C.CFtdcMdSpiExt)(this).spi,
 	).callback.OnRtnDepthMarketData(
-		(*CRsaFtdcDepthMarketDataField)(unsafe.Pointer(pDepthMarketData)))
+		(&CRsaFtdcDepthMarketDataField{}).FromCStruct(pDepthMarketData),
+	)
 }
 
 //export CgoOnRspSubMarketData
@@ -115,11 +134,20 @@ func CgoOnRspSubMarketData(
 	pRspInfo *C.struct_CRsaFtdcRspInfoField,
 	nRequestID C.int, bIsLast C.bool,
 ) {
+	slog.Log(
+		context.Background(), slog.LevelDebug-1,
+		"rmd CgoOnRspSubMarketData called",
+		slog.Any("spi", this),
+		slog.Any("login", pSpecificInstrument),
+		slog.Any("info", pRspInfo),
+		slog.Int("req", int(nRequestID)),
+		slog.Bool("last", bool(bIsLast)),
+	)
 	(*goFtdcMdSpi)(
 		(*C.CFtdcMdSpiExt)(this).spi,
 	).callback.OnRspSubMarketData(
-		(*CRsaFtdcSpecificInstrumentField)(unsafe.Pointer(pSpecificInstrument)),
-		(*CRsaFtdcRspInfoField)(unsafe.Pointer(pRspInfo)),
+		(&CRsaFtdcSpecificInstrumentField{}).FromCStruct(pSpecificInstrument),
+		(&CRsaFtdcRspInfoField{}).FromCStruct(pRspInfo),
 		int(nRequestID), bool(bIsLast),
 	)
 }
@@ -131,11 +159,20 @@ func CgoOnRspUnSubMarketData(
 	pRspInfo *C.struct_CRsaFtdcRspInfoField,
 	nRequestID C.int, bIsLast C.bool,
 ) {
+	slog.Log(
+		context.Background(), slog.LevelDebug-1,
+		"rmd CgoOnRspUnSubMarketData called",
+		slog.Any("spi", this),
+		slog.Any("login", pSpecificInstrument),
+		slog.Any("info", pRspInfo),
+		slog.Int("req", int(nRequestID)),
+		slog.Bool("last", bool(bIsLast)),
+	)
 	(*goFtdcMdSpi)(
 		(*C.CFtdcMdSpiExt)(this).spi,
 	).callback.OnRspUnSubMarketData(
-		(*CRsaFtdcSpecificInstrumentField)(unsafe.Pointer(pSpecificInstrument)),
-		(*CRsaFtdcRspInfoField)(unsafe.Pointer(pRspInfo)),
+		(&CRsaFtdcSpecificInstrumentField{}).FromCStruct(pSpecificInstrument),
+		(&CRsaFtdcRspInfoField{}).FromCStruct(pRspInfo),
 		int(nRequestID), bool(bIsLast),
 	)
 }
@@ -145,10 +182,16 @@ func CgoOnRtnBarMarketData(
 	this unsafe.Pointer,
 	pBarMarketData *C.struct_CRsaFtdcBarMarketDataField,
 ) {
+	slog.Log(
+		context.Background(), slog.LevelDebug-2,
+		"rmd CgoOnRtnBarMarketData called",
+		slog.Any("spi", this),
+		slog.Any("bar", pBarMarketData),
+	)
 	(*goFtdcMdSpi)(
 		(*C.CFtdcMdSpiExt)(this).spi,
 	).callback.OnRtnBarMarketData(
-		(*CRsaFtdcBarMarketDataField)(unsafe.Pointer(pBarMarketData)),
+		GetBar().FromCStruct(pBarMarketData),
 	)
 }
 
@@ -159,11 +202,20 @@ func CgoOnRspQryMarketData(
 	pRspInfo *C.struct_CRsaFtdcRspInfoField,
 	nRequestID C.int, bIsLast C.bool,
 ) {
+	slog.Log(
+		context.Background(), slog.LevelDebug-1,
+		"rmd CgoOnRspQryMarketData called",
+		slog.Any("spi", this),
+		slog.Any("md", pRspMarketData),
+		slog.Any("info", pRspInfo),
+		slog.Int("req", int(nRequestID)),
+		slog.Bool("last", bool(bIsLast)),
+	)
 	(*goFtdcMdSpi)(
 		(*C.CFtdcMdSpiExt)(this).spi,
 	).callback.OnRspQryMarketData(
-		(*CRsaFtdcRspMarketDataField)(unsafe.Pointer(pRspMarketData)),
-		(*CRsaFtdcRspInfoField)(unsafe.Pointer(pRspInfo)),
+		(&CRsaFtdcRspMarketDataField{}).FromCStruct(pRspMarketData),
+		(&CRsaFtdcRspInfoField{}).FromCStruct(pRspInfo),
 		int(nRequestID), bool(bIsLast),
 	)
 }
@@ -173,10 +225,16 @@ func CgoOnRtnMarketDataEnd(
 	this unsafe.Pointer,
 	pMarketDataEnd *C.struct_CRsaFtdcNtfMarketDataEndField,
 ) {
+	slog.Log(
+		context.Background(), slog.LevelDebug-1,
+		"rmd CgoOnRtnMarketDataEnd called",
+		slog.Any("spi", this),
+		slog.Any("end", pMarketDataEnd),
+	)
 	(*goFtdcMdSpi)(
 		(*C.CFtdcMdSpiExt)(this).spi,
 	).callback.OnRtnMarketDataEnd(
-		(*CRsaFtdcNtfMarketDataEndField)(unsafe.Pointer(pMarketDataEnd)),
+		(&CRsaFtdcNtfMarketDataEndField{}).FromCStruct(pMarketDataEnd),
 	)
 }
 
@@ -186,7 +244,7 @@ func (rtn reqRtn) Error() string {
 	return fmt.Sprintf("req execution failed: %d", rtn)
 }
 
-func Rtn(rtn C.int) error {
+func CheckRtn(rtn C.int) error {
 	if rtn == 0 {
 		return nil
 	}
@@ -298,8 +356,8 @@ func CreateFtdcMdApi(
 
 			runtime.SetFinalizer(api, func(ins *CFtdcMdApi) {
 				ins.Release()
-				ins.spiPtr = nil
 				ins.spiPtr.pinner.Unpin()
+				ins.spiPtr = nil
 
 				C.dlclose(ins.lib)
 			})
@@ -314,6 +372,10 @@ func (api *CFtdcMdApi) Release() {
 		api.apiPtr.vtable.CFtdcMdApiVtable_Release,
 		unsafe.Pointer(api.apiPtr),
 	)
+	slog.Log(
+		context.Background(), slog.LevelDebug-1,
+		"rmd CallRelease executed",
+	)
 }
 
 func (api *CFtdcMdApi) Init() {
@@ -321,20 +383,38 @@ func (api *CFtdcMdApi) Init() {
 		api.apiPtr.vtable.CFtdcMdApiVtable_Init,
 		unsafe.Pointer(api.apiPtr),
 	)
+	slog.Log(
+		context.Background(), slog.LevelDebug-1,
+		"rmd CallInit executed",
+	)
 }
 
-func (api *CFtdcMdApi) Join() error {
-	return Rtn(C.CallJoin(
+func (api *CFtdcMdApi) Join() (rtn error) {
+	rtn = CheckRtn(C.CallJoin(
 		api.apiPtr.vtable.CFtdcMdApiVtable_Join,
 		unsafe.Pointer(api.apiPtr),
 	))
+
+	slog.Log(
+		context.Background(), slog.LevelDebug-1,
+		"rmd CallJoin executed",
+	)
+
+	return
 }
 
-func (api *CFtdcMdApi) ChkCurrentThread() bool {
-	return bool(C.CallChkCurrentThread(
+func (api *CFtdcMdApi) ChkCurrentThread() (rtn bool) {
+	rtn = bool(C.CallChkCurrentThread(
 		api.apiPtr.vtable.CFtdcMdApiVtable_ChkCurrentThread,
 		unsafe.Pointer(api.apiPtr),
 	))
+
+	slog.Log(
+		context.Background(), slog.LevelDebug-1,
+		"rmd CallChkCurrentThread executed",
+	)
+
+	return
 }
 
 func (api *CFtdcMdApi) RegisterNameServer(nsAddress string) {
@@ -345,6 +425,12 @@ func (api *CFtdcMdApi) RegisterNameServer(nsAddress string) {
 		api.apiPtr.vtable.CFtdcMdApiVtable_RegisterNameServer,
 		unsafe.Pointer(api.apiPtr),
 		pszNsAddress,
+	)
+
+	slog.Log(
+		context.Background(), slog.LevelDebug-1,
+		"rmd CallRegisterNameServer executed",
+		slog.String("addr", nsAddress),
 	)
 }
 
@@ -358,6 +444,7 @@ func (api *CFtdcMdApi) RegisterSpi(spi RmdSpi) {
 		api.spiPtr = new(goFtdcMdSpi)
 		api.spiPtr.callback = spi
 
+		// 将go的spi实例pin在内存中，以免GC或其他情况移动内存导致指针失效
 		api.spiPtr.pinner.Pin(unsafe.Pointer(api.spiPtr))
 		slog.Debug(
 			"spi wrapper pinned",
@@ -374,29 +461,43 @@ func (api *CFtdcMdApi) RegisterSpi(spi RmdSpi) {
 			unsafe.Pointer(api.apiPtr),
 			cSpi,
 		)
+
+		slog.Log(
+			context.Background(), slog.LevelDebug-1,
+			"rmd CallRegisterSpi executed",
+			slog.Any("spi", spi),
+		)
 	})
 }
 
-func (api *CFtdcMdApi) ReqUserLogin(login *CRsaFtdcReqUserLoginField) error {
+func (api *CFtdcMdApi) ReqUserLogin(login *CRsaFtdcReqUserLoginField) (rtn error) {
 	if login == nil {
 		return fmt.Errorf(
 			"%w: login info is nil", ErrInvalidReqData,
 		)
 	}
 
-	return Rtn(C.CallReqUserLogin(
+	rtn = CheckRtn(C.CallReqUserLogin(
 		api.apiPtr.vtable.CFtdcMdApiVtable_ReqUserLogin,
 		unsafe.Pointer(api.apiPtr),
-		(*C.struct_CRsaFtdcReqUserLoginField)(unsafe.Pointer(login)),
+		login.ToCStruct(),
 		C.int(api.reqID.Add(1)),
 	))
+
+	slog.Log(
+		context.Background(), slog.LevelDebug-1,
+		"rmd CallReqUserLogin executed",
+		slog.Any("login", login),
+	)
+
+	return
 }
 
-func (api *CFtdcMdApi) ReqSubMarketData(instruments ...string) error {
+func (api *CFtdcMdApi) ReqSubMarketData(instruments ...string) (rtn error) {
 	if len(instruments) <= 0 {
-		slog.Warn("sub instruments is empty")
-
-		return nil
+		return fmt.Errorf(
+			"%w: no sub instruments specified", ErrInvalidReqData,
+		)
 	}
 
 	ppInstruments := make([]*C.char, len(instruments))
@@ -409,19 +510,27 @@ func (api *CFtdcMdApi) ReqSubMarketData(instruments ...string) error {
 		}
 	}()
 
-	return Rtn(C.CallReqSubMarketData(
+	rtn = CheckRtn(C.CallReqSubMarketData(
 		api.apiPtr.vtable.CFtdcMdApiVtable_ReqSubMarketData,
 		unsafe.Pointer(api.apiPtr),
-		(**C.char)(unsafe.Pointer(ppInstruments[0])),
+		(**C.char)(unsafe.Pointer(&ppInstruments[0])),
 		C.int(len(ppInstruments)),
 	))
+
+	slog.Log(
+		context.Background(), slog.LevelDebug-1,
+		"rmd CallReqSubMarketData executed",
+		slog.Any("subs", instruments),
+	)
+
+	return
 }
 
-func (api *CFtdcMdApi) ReqUnSubMarketData(instruments ...string) error {
+func (api *CFtdcMdApi) ReqUnSubMarketData(instruments ...string) (rtn error) {
 	if len(instruments) <= 0 {
-		slog.Warn("un-sub instruments is empty")
-
-		return nil
+		return fmt.Errorf(
+			"%w: no un-sub instruments specified", ErrInvalidReqData,
+		)
 	}
 
 	ppInstruments := make([]*C.char, len(instruments))
@@ -434,126 +543,204 @@ func (api *CFtdcMdApi) ReqUnSubMarketData(instruments ...string) error {
 		}
 	}()
 
-	return Rtn(C.CallReqUnSubMarketData(
+	rtn = CheckRtn(C.CallReqUnSubMarketData(
 		api.apiPtr.vtable.CFtdcMdApiVtable_ReqUnSubMarketData,
 		unsafe.Pointer(api.apiPtr),
-		(**C.char)(unsafe.Pointer(ppInstruments[0])),
+		(**C.char)(unsafe.Pointer(&ppInstruments[0])),
 		C.int(len(ppInstruments)),
 	))
+
+	slog.Log(
+		context.Background(), slog.LevelDebug-1,
+		"rmd CallReqUnSubMarketData executed",
+		slog.Any("un-subs", instruments),
+	)
+
+	return
 }
 
-func (api *CFtdcMdApi) ReqQryMarketData(qry *CRsaFtdcQryMarketDataField) error {
+func (api *CFtdcMdApi) ReqQryMarketData(qry *CRsaFtdcQryMarketDataField) (rtn error) {
 	if qry == nil {
 		return fmt.Errorf(
 			"%w: query market data info is nil", ErrInvalidReqData,
 		)
 	}
 
-	return Rtn(C.CallReqQryMarketData(
+	rtn = CheckRtn(C.CallReqQryMarketData(
 		api.apiPtr.vtable.CFtdcMdApiVtable_ReqQryMarketData,
 		unsafe.Pointer(api.apiPtr),
-		(*C.struct_CRsaFtdcQryMarketDataField)(unsafe.Pointer(qry)),
+		qry.ToCStruct(),
 		C.int(api.reqID.Add(1)),
 	))
+
+	slog.Log(
+		context.Background(), slog.LevelDebug-1,
+		"rmd CallReqQryMarketData executed",
+		slog.Any("qry", qry),
+	)
+
+	return
 }
 
 func (api *CFtdcMdApi) ReqSendDepthMarketDataRead(
 	depth *CRsaFtdcDepthMarketDataField,
-) error {
+) (rtn error) {
 	if depth == nil {
 		return fmt.Errorf(
 			"%w: requst send depth market data is nil", ErrInvalidReqData,
 		)
 	}
 
-	return Rtn(C.CallReqSendDepthMarketDataRead(
+	rtn = CheckRtn(C.CallReqSendDepthMarketDataRead(
 		api.apiPtr.vtable.CFtdcMdApiVtable_ReqSendDepthMarketDataRead,
 		unsafe.Pointer(api.apiPtr),
-		(*C.struct_CRsaFtdcDepthMarketDataField)(unsafe.Pointer(depth)),
+		depth.ToCStruct(),
 		C.int(api.reqID.Add(1)),
 	))
+
+	slog.Log(
+		context.Background(), slog.LevelDebug-1,
+		"rmd CallReqSendDepthMarketDataRead executed",
+		slog.Any("depth", depth),
+	)
+
+	return
 }
 
 func (api *CFtdcMdApi) ReqSendBarMarketDataRead(
 	bar *CRsaFtdcBarMarketDataField,
-) error {
-	return Rtn(C.CallReqSendBarMarketDataRead(
+) (rtn error) {
+	if bar == nil {
+		return fmt.Errorf(
+			"%w: requst send bar market data is nil", ErrInvalidReqData,
+		)
+	}
+
+	rtn = CheckRtn(C.CallReqSendBarMarketDataRead(
 		api.apiPtr.vtable.CFtdcMdApiVtable_ReqSendBarMarketDataRead,
 		unsafe.Pointer(api.apiPtr),
-		(*C.struct_CRsaFtdcBarMarketDataField)(unsafe.Pointer(bar)),
+		bar.ToCStruct(),
 		C.int(api.reqID.Add(1)),
 	))
+
+	slog.Log(
+		context.Background(), slog.LevelDebug-1,
+		"rmd CallReqSendBarMarketDataRead executed",
+		slog.Any("bar", bar),
+	)
+
+	return
 }
 
 func (api *CFtdcMdApi) ReqBtSubMarketData(
 	subs ...*CRsaFtdcBtSubMarketDataField,
-) error {
+) (rtn error) {
 	if len(subs) <= 0 {
-		return nil
+		return fmt.Errorf(
+			"%w: no sub list specified", ErrInvalidReqData,
+		)
 	}
 
 	ppFields := make([]*C.struct_CRsaFtdcBtSubMarketDataField, len(subs))
 	for idx, sub := range subs {
-		ppFields[idx] = (*C.struct_CRsaFtdcBtSubMarketDataField)(
-			unsafe.Pointer(sub))
+		ppFields[idx] = sub.ToCStruct()
 	}
+	defer func() {
+		for _, ptr := range ppFields {
+			C.free(unsafe.Pointer(ptr))
+		}
+	}()
 
-	return Rtn(C.CallReqBtSubMarketData(
+	rtn = CheckRtn(C.CallReqBtSubMarketData(
 		api.apiPtr.vtable.CFtdcMdApiVtable_ReqBtSubMarketData,
 		unsafe.Pointer(api.apiPtr),
 		(**C.struct_CRsaFtdcBtSubMarketDataField)(unsafe.Pointer(&ppFields[0])),
 		C.int(len(subs)),
 	))
+
+	slog.Log(
+		context.Background(), slog.LevelDebug-1,
+		"rmd CallReqBtSubMarketData executed",
+		slog.Any("subs", subs),
+	)
+
+	return
 }
 
 func (api *CFtdcMdApi) ReqBtUnSubMarketData(
 	unSubs ...*CRsaFtdcBtSubMarketDataField,
-) error {
+) (rtn error) {
 	if len(unSubs) <= 0 {
-		return nil
+		return fmt.Errorf(
+			"%w: no un-sub list specified", ErrInvalidReqData,
+		)
 	}
 
 	ppFields := make([]*C.struct_CRsaFtdcBtSubMarketDataField, len(unSubs))
 	for idx, sub := range unSubs {
-		ppFields[idx] = (*C.struct_CRsaFtdcBtSubMarketDataField)(
-			unsafe.Pointer(sub))
+		ppFields[idx] = sub.ToCStruct()
 	}
 
-	return Rtn(C.CallReqBtUnSubMarketData(
+	rtn = CheckRtn(C.CallReqBtUnSubMarketData(
 		api.apiPtr.vtable.CFtdcMdApiVtable_ReqBtUnSubMarketData,
 		unsafe.Pointer(api.apiPtr),
 		(**C.struct_CRsaFtdcBtSubMarketDataField)(unsafe.Pointer(&ppFields[0])),
 		C.int(len(unSubs)),
 	))
+
+	slog.Log(
+		context.Background(), slog.LevelDebug-1,
+		"rmd CallReqBtUnSubMarketData executed",
+		slog.Any("un-subs", unSubs),
+	)
+
+	return
 }
 
-func (api *CFtdcMdApi) ReqSubMarketDataCompleted() error {
-	return Rtn(C.CallReqSubMarketDataCompleted(
+func (api *CFtdcMdApi) ReqSubMarketDataCompleted() (rtn error) {
+	rtn = CheckRtn(C.CallReqSubMarketDataCompleted(
 		api.apiPtr.vtable.CFtdcMdApiVtable_ReqSubMarketDataCompleted,
 		unsafe.Pointer(api.apiPtr),
 	))
+
+	slog.Log(
+		context.Background(), slog.LevelDebug-1,
+		"rmd CallReqSubMarketDataCompleted executed",
+	)
+
+	return
 }
 
 func (api *CFtdcMdApi) ReqSubCombMarketData(
 	subs ...*CRsaFtdcSubCombMarketDataField,
-) error {
+) (rtn error) {
 	if len(subs) <= 0 {
-		return nil
+		return fmt.Errorf(
+			"%w: no combo sub list specified",
+			ErrInvalidReqData,
+		)
 	}
 
 	ppFields := make([]*C.struct_CRsaFtdcSubCombMarketDataField, len(subs))
 	for idx, sub := range subs {
-		ppFields[idx] = (*C.struct_CRsaFtdcSubCombMarketDataField)(
-			unsafe.Pointer(sub))
+		ppFields[idx] = sub.ToCStruct()
 	}
 
-	return Rtn(C.CallReqSubCombMarketData(
+	rtn = CheckRtn(C.CallReqSubCombMarketData(
 		api.apiPtr.vtable.CFtdcMdApiVtable_ReqSubCombMarketData,
 		unsafe.Pointer(api.apiPtr),
 		(**C.struct_CRsaFtdcSubCombMarketDataField)(
 			unsafe.Pointer(&ppFields[0])),
 		C.int(len(subs)),
 	))
+
+	slog.Log(
+		context.Background(), slog.LevelDebug-1,
+		"rmd CallReqSubCombMarketData executed",
+		slog.Any("subs", subs),
+	)
+
+	return
 }
 
 func (api *CFtdcMdApi) ReqQryBarMarketData(
@@ -574,19 +761,27 @@ func (api *CFtdcMdApi) ReqQryBarMarketData(
 	data := make([]*C.struct_CRsaFtdcBarMarketDataField, count)
 	outCount := C.int(count)
 
-	if err := Rtn(C.CallReqQryBarMarketData(
+	err := CheckRtn(C.CallReqQryBarMarketData(
 		api.apiPtr.vtable.CFtdcMdApiVtable_ReqQryBarMarketData,
 		unsafe.Pointer(api.apiPtr),
-		(*C.struct_CRsaFtdcBtSubMarketDataField)(unsafe.Pointer(sub)),
+		sub.ToCStruct(),
 		(**C.struct_CRsaFtdcBarMarketDataField)(unsafe.Pointer(&data[0])),
 		&outCount,
-	)); err != nil {
+	))
+
+	slog.Log(
+		context.Background(), slog.LevelDebug-1,
+		"rmd CallReqQryBarMarketData executed",
+		slog.Any("sub", sub), slog.Int("count", count),
+	)
+
+	if err != nil {
 		return nil, err
 	} else {
 		bars := make([]*CRsaFtdcBarMarketDataField, outCount)
 
 		for idx, bar := range data[:outCount] {
-			bars[idx] = (*CRsaFtdcBarMarketDataField)(unsafe.Pointer(bar))
+			bars[idx].FromCStruct(bar)
 		}
 
 		return bars, nil
@@ -598,7 +793,7 @@ func (api *CFtdcMdApi) ReqQryDepthMarketData(
 ) ([]*CRsaFtdcDepthMarketDataField, error) {
 	if sub == nil {
 		return nil, fmt.Errorf(
-			"%w: query bar data is nil", ErrInvalidReqData,
+			"%w: query depth data is nil", ErrInvalidReqData,
 		)
 	}
 
@@ -611,19 +806,27 @@ func (api *CFtdcMdApi) ReqQryDepthMarketData(
 	data := make([]*C.struct_CRsaFtdcDepthMarketDataField, count)
 	outCount := C.int(count)
 
-	if err := Rtn(C.CallReqQryDepthMarketData(
+	err := CheckRtn(C.CallReqQryDepthMarketData(
 		api.apiPtr.vtable.CFtdcMdApiVtable_ReqQryDepthMarketData,
 		unsafe.Pointer(api.apiPtr),
-		(*C.struct_CRsaFtdcQryMarketDataField)(unsafe.Pointer(sub)),
+		sub.ToCStruct(),
 		(**C.struct_CRsaFtdcDepthMarketDataField)(unsafe.Pointer(&data[0])),
 		&outCount,
-	)); err != nil {
+	))
+
+	slog.Log(
+		context.Background(), slog.LevelDebug-1,
+		"rmd CallReqQryDepthMarketData executed",
+		slog.Any("sub", sub), slog.Int("count", count),
+	)
+
+	if err != nil {
 		return nil, err
 	} else {
 		ticks := make([]*CRsaFtdcDepthMarketDataField, outCount)
 
 		for idx, tick := range data[:outCount] {
-			ticks[idx] = (*CRsaFtdcDepthMarketDataField)(unsafe.Pointer(tick))
+			ticks[idx].FromCStruct(tick)
 		}
 
 		return ticks, nil
