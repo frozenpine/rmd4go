@@ -13,9 +13,9 @@ func _() {
 	_ = x[BarPrecesDay-50]
 }
 
-const _TRsaFtdcBarPrecesType_name = "秒分日"
+const _TRsaFtdcBarPrecesType_name = "smd"
 
-var _TRsaFtdcBarPrecesType_index = [...]uint8{0, 3, 6, 9}
+var _TRsaFtdcBarPrecesType_index = [...]uint8{0, 1, 2, 3}
 
 func (i TRsaFtdcBarPrecesType) String() string {
 	i -= 48

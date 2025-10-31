@@ -1363,9 +1363,9 @@ const Rsa_FTDC_BP_Day uint8 = '2'
 type TRsaFtdcBarPrecesType uint8
 
 const (
-	BarPrecesSecond TRsaFtdcBarPrecesType = TRsaFtdcBarPrecesType(Rsa_FTDC_BP_Second) // 秒
-	BarPrecesMinute TRsaFtdcBarPrecesType = TRsaFtdcBarPrecesType(Rsa_FTDC_BP_Minute) // 分
-	BarPrecesDay    TRsaFtdcBarPrecesType = TRsaFtdcBarPrecesType(Rsa_FTDC_BP_Day)    // 日
+	BarPrecesSecond TRsaFtdcBarPrecesType = TRsaFtdcBarPrecesType(Rsa_FTDC_BP_Second) // s
+	BarPrecesMinute TRsaFtdcBarPrecesType = TRsaFtdcBarPrecesType(Rsa_FTDC_BP_Minute) // m
+	BarPrecesDay    TRsaFtdcBarPrecesType = TRsaFtdcBarPrecesType(Rsa_FTDC_BP_Day)    // d
 )
 
 // TFtdcOpenCloseMethodType是一个开平方式类型

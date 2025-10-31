@@ -135,7 +135,7 @@ func (spi *ChannelSpi[T]) OnRspUnSubMarketData(
 			slog.Bool("is_last", isLast),
 		)
 	} else {
-		evt.evtType = EventOnRspSubMarketData
+		evt.evtType = EventOnRspUnSubMarketData
 		evt.data = instrument
 
 		if evt.response == nil {
@@ -159,7 +159,7 @@ func (spi *ChannelSpi[T]) OnRtnBarMarketData(
 			slog.Any("bar", bar),
 		)
 	} else {
-		evt.evtType = EventOnRspSubMarketData
+		evt.evtType = EventOnRtnBarMarketData
 		evt.data = bar
 
 		spi.sendEvent(evt)
@@ -181,7 +181,7 @@ func (spi *ChannelSpi[T]) OnRspQryMarketData(
 			slog.Bool("is_last", isLast),
 		)
 	} else {
-		evt.evtType = EventOnRspSubMarketData
+		evt.evtType = EventOnRspQryMarketData
 		evt.data = md
 
 		if evt.response == nil {
@@ -205,7 +205,7 @@ func (spi *ChannelSpi[T]) OnRtnMarketDataEnd(
 			slog.Any("date", dt),
 		)
 	} else {
-		evt.evtType = EventOnRspSubMarketData
+		evt.evtType = EventOnRtnMarketDataEnd
 		evt.data = dt
 
 		spi.sendEvent(evt)
