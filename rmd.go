@@ -909,8 +909,6 @@ func (api *CFtdcMdApi) ReqQryDepthMarketData(
 }
 
 func init() {
-	slog.Info("initializing RMD SPI vtable")
-
 	spiCVtablePtr = (*C.CFtdcMdSpiVtable)(C.malloc(C.sizeof_CFtdcMdSpiVtable))
 
 	spiCVtablePtr.CFtdcMdSpi_OnMdFrontConnected = (C.OnMdFrontConnected)(
@@ -931,6 +929,4 @@ func init() {
 		unsafe.Pointer(C.COnRspQryMarketData))
 	spiCVtablePtr.CFtdcMdSpi_OnRtnMarketDataEnd = (C.OnRtnMarketDataEnd)(
 		unsafe.Pointer(C.COnRtnMarketDataEnd))
-
-	slog.Info("RMD SPI vtable initialized")
 }

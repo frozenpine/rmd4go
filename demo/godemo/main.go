@@ -7,10 +7,12 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"runtime"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/frozenpine/rmd4go"
@@ -226,9 +228,11 @@ func (s *subList) Set(v string) error {
 }
 
 var (
-	libPath, flowPath, remoteConn string
+	version, goVersion, gitVersion, buildTime string
 
-	subs subList
+	libPath, flowPath, remoteConn string
+	subs                          subList
+	debug                         int = -1
 )
 
 func init() {
@@ -236,7 +240,23 @@ func init() {
 	flag.StringVar(&flowPath, "flow", "./flow/", "RMD lib flow path")
 	flag.StringVar(&remoteConn, "remote", "", "RMD remote conn string")
 
+	flag.BoolFunc("v", "Set verbose level", func(_ string) error {
+		debug += 1
+		return nil
+	})
+
 	flag.Var(&subs, "sub", "Subscribe list")
+
+	flag.BoolFunc("ver", "Show version info", func(_ string) error {
+		fmt.Printf(
+			"rmd4go version: %s build by %s\nGit version: %s, Build time: %s",
+			version, goVersion, gitVersion, buildTime,
+		)
+
+		os.Exit(0)
+
+		return nil
+	})
 }
 
 func waitRsp(ctx context.Context, wait <-chan bool, timeout time.Duration) error {
@@ -264,9 +284,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	if len(subs) < 1 {
+	if len(subs) <= 0 {
 		slog.Error("no subs specified")
 		os.Exit(1)
+	}
+
+	if debug > 0 {
+		slog.SetLogLoggerLevel(slog.LevelDebug - slog.Level(debug))
 	}
 
 	switch runtime.GOOS {
@@ -297,7 +321,11 @@ func main() {
 	}
 	defer api.Release()
 
-	ctx := context.Background()
+	ctx, cancel := signal.NotifyContext(
+		context.Background(),
+		syscall.SIGABRT, syscall.SIGINT, syscall.SIGHUP, syscall.SIGKILL,
+	)
+	defer cancel()
 
 	wait := make(chan bool)
 

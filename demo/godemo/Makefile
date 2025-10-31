@@ -1,14 +1,14 @@
-NAME="godemo"
-VERSION=1.0.1
+NAME="rmd4go"
+VERSION=1.0.0
 BUILD=`date +%FT%T%z`
 
 PACKAGES=`go list ./... | grep -v /vendor/`
 VETPACKAGES=`go list ./... | grep -v /vendor/ | grep -v /examples/`
 GOFILES=`find . -name "*.go" -type f -not -path "./vendor/*"`
-EXTRA_FLAGS=-X 'github.com/frozenpine/mdplatform/cli/mdserver/cmd.version=${VERSION}' \
-	-X 'github.com/frozenpine/mdplatform/cli/mdserver/cmd.goVersion=`go version|cut -d ' ' -f3`' \
-	-X 'github.com/frozenpine/mdplatform/cli/mdserver/cmd.gitVersion=`git rev-parse --short HEAD`' \
-	-X 'github.com/frozenpine/mdplatform/cli/mdserver/cmd.buildTime=`date '+%Y-%m-%d %H:%M:%S'`'
+EXTRA_FLAGS=-X 'main.version=${VERSION}' \
+	-X 'main.goVersion=`go version|cut -d ' ' -f3`' \
+	-X 'main.gitVersion=`git rev-parse --short HEAD`' \
+	-X 'main.buildTime=`date '+%Y-%m-%d %H:%M:%S'`'
 GO_BUILD_TAGS=
 CGO_LD_FLAGS=
 
