@@ -11,7 +11,7 @@ extern "C" {
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <strings.h>
+#include <string.h>
 #include <dlfcn.h>
 
 #include "FtdcApiStruct.h"
