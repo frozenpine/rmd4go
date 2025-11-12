@@ -354,7 +354,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := api.ReqUserLogin(
+	if _, err := api.ReqUserLogin(
 		&rmd4go.CRsaFtdcReqUserLoginField{},
 	); err != nil {
 		slog.Error(
@@ -369,7 +369,7 @@ func main() {
 		)
 	}
 
-	if err := api.ReqBtSubMarketData(subs...); err != nil {
+	if _, err := api.ReqBtSubMarketData(subs...); err != nil {
 		slog.Error(
 			"req sub market data failed",
 			slog.Any("error", err),

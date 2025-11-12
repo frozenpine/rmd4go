@@ -1,12 +1,12 @@
 #ifndef Rsa_FTDCDATATYPE_H
 #define Rsa_FTDCDATATYPE_H
 
-enum Rsa_TE_RESUME_TYPE
-{
-	Rsa_TERT_RESTART = 0,
-	Rsa_TERT_RESUME,
-	Rsa_TERT_QUICK
-};
+// enum Rsa_TE_RESUME_TYPE
+// {
+// 	Rsa_TERT_RESTART = 0,
+// 	Rsa_TERT_RESUME,
+// 	Rsa_TERT_QUICK
+// };
 
 /////////////////////////////////////////////////////////////////////////
 ///定义交易通道类型类别
@@ -54,13 +54,13 @@ enum Rsa_TE_RESUME_TYPE
 //连接伦敦国际金融期货交易所
 #define Rsa_EI_LIFFE "LIFFE"
 
-const int Rsa_TSS_DIALOG = 1;		//对话流
-const int Rsa_TSS_PRIVATE = 2;		//客户私有流
-const int Rsa_TSS_PUBLIC = 3;		//公共流
-const int Rsa_TSS_QUERY = 4;		//查询
-const int Rsa_TSS_USER = 5;		//用户私有流
-const int Rsa_TSS_MARKET = 6;		//MBL行情流
-const int Rsa_TSS_SPEC = 7;		//UserApi特殊流水流
+// const int Rsa_TSS_DIALOG = 1;		//对话流
+// const int Rsa_TSS_PRIVATE = 2;		//客户私有流
+// const int Rsa_TSS_PUBLIC = 3;		//公共流
+// const int Rsa_TSS_QUERY = 4;		//查询
+// const int Rsa_TSS_USER = 5;		//用户私有流
+// const int Rsa_TSS_MARKET = 6;		//MBL行情流
+// const int Rsa_TSS_SPEC = 7;		//UserApi特殊流水流
 
 /////////////////////////////////////////////////////////////////////////
 ///TFtdcPriceTickType是一个最小变动价位类型
