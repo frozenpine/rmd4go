@@ -941,24 +941,29 @@ func (api *CFtdcMdApi) ReqQryBarMarketData(
 		&outCount,
 	))
 
+	buffCount := int(outCount)
+
 	slog.Log(
 		context.Background(), slog.LevelDebug-1,
 		"rmd CallReqQryBarMarketData executed",
 		slog.Any("sub", sub),
-		slog.Int("out_count", int(outCount)),
+		slog.Int("out_count", buffCount),
 		slog.Any("rtn", rtn),
 	)
 
 	if rtn != nil {
 		return nil, rtn
+	} else if buffCount > count {
+		return nil, errors.New("invalid queried bar buffer len")
 	} else {
-		bars := make([]*CRsaFtdcBarMarketDataField, outCount)
+		bars := make([]*CRsaFtdcBarMarketDataField, buffCount)
 
-		for idx, bar := range data[:outCount] {
+		for idx, bar := range data[:buffCount] {
 			if bar == nil {
 				slog.Error(
 					"invalid queried bar pointer",
 					slog.Int("idx", idx),
+					slog.Any("pointer", bar),
 				)
 				return nil, errors.New("invalid bar pointer")
 			}
@@ -1002,24 +1007,29 @@ func (api *CFtdcMdApi) ReqQryDepthMarketData(
 		&outCount,
 	))
 
+	buffCount := int(outCount)
+
 	slog.Log(
 		context.Background(), slog.LevelDebug-1,
 		"rmd CallReqQryDepthMarketData executed",
 		slog.Any("sub", sub),
-		slog.Int("out_count", int(outCount)),
+		slog.Int("out_count", buffCount),
 		slog.Any("rtn", rtn),
 	)
 
 	if rtn != nil {
 		return nil, rtn
+	} else if buffCount > count {
+		return nil, errors.New("invalid queried tick buff len")
 	} else {
-		ticks := make([]*CRsaFtdcDepthMarketDataField, outCount)
+		ticks := make([]*CRsaFtdcDepthMarketDataField, buffCount)
 
-		for idx, tick := range data[:outCount] {
+		for idx, tick := range data[:buffCount] {
 			if tick == nil {
 				slog.Error(
 					"invalid queried tick pointer",
 					slog.Int("idx", idx),
+					slog.Any("pointer", tick),
 				)
 				return nil, errors.New("invalid tick pointer")
 			}

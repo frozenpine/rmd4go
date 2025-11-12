@@ -14,8 +14,8 @@
 class CFtdcMdSpi
 {
 public:
-	virtual void OnMdFrontConnected(){};
-	virtual void OnMdFrontDisconnected(int nReason){};
+	virtual void OnMdFrontConnected() {};
+	virtual void OnMdFrontDisconnected(int nReason) {};
 	virtual void OnMdRspUserLogin(CRsaFtdcRspUserLoginField *pRspUserLogin, CRsaFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {};
 	virtual void OnRtnDepthMarketData(CRsaFtdcDepthMarketDataField *pDepthMarketData) {};
 	virtual void OnRspSubMarketData(CRsaFtdcSpecificInstrumentField *pSpecificInstrument, CRsaFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {};
@@ -36,19 +36,17 @@ public:
 	virtual void RegisterNameServer(const char *pszNsAddress) = 0;
 	virtual void RegisterSpi(CFtdcMdSpi *pSpi) = 0;
 	virtual int ReqUserLogin(CRsaFtdcReqUserLoginField *pReqUserLoginField, int nRequestID) = 0;
-	virtual int ReqSubMarketData(char *ppInstrumentID[], int nCount)=0;
-	virtual int ReqUnSubMarketData(char *ppInstrumentID[], int nCount)=0;
+	virtual int ReqSubMarketData(char *ppInstrumentID[], int nCount, int nRequestID=-1)=0;
+	virtual int ReqUnSubMarketData(char *ppInstrumentID[], int nCount, int nRequestID = -1)=0;
 	virtual int ReqQryMarketData(CRsaFtdcQryMarketDataField *pQryMarketData, int nRequestID) = 0;
 	virtual int ReqSendDepthMarketDataRead(CRsaFtdcDepthMarketDataField *pDepthMarketData, int nRequestID) = 0;
 	virtual int ReqSendBarMarketDataRead(CRsaFtdcBarMarketDataField *pBarMarketData, int nRequestID) = 0;
-	virtual int ReqBtSubMarketData(CRsaFtdcBtSubMarketDataField *ppFiels[], int nCount) = 0;
-	virtual int ReqBtUnSubMarketData(CRsaFtdcBtSubMarketDataField *ppFiels[], int nCount) = 0;
+	virtual int ReqBtSubMarketData(CRsaFtdcBtSubMarketDataField *ppFiels[], int nCount, int nRequestID = -1) = 0;
+	virtual int ReqBtUnSubMarketData(CRsaFtdcBtSubMarketDataField *ppFiels[], int nCount, int nRequestID = -1) = 0;
 	virtual int ReqSubMarketDataCompleted() = 0;
 	virtual int ReqSubCombMarketData(CRsaFtdcSubCombMarketDataField* ppFiels[], int nCount) = 0;
-	virtual int ReqQryBarMarketData(CRsaFtdcBtSubMarketDataField* subMd, CRsaFtdcBarMarketDataField* bars[], int& count)
-	 = 0;
-	virtual int ReqQryDepthMarketData(CRsaFtdcQryMarketDataField* pQryMarketData, CRsaFtdcDepthMarketDataField*
-	depthMd[], int& count) = 0;
+	virtual int ReqQryBarMarketData(CRsaFtdcBtSubMarketDataField* subMd, CRsaFtdcBarMarketDataField* bars[], int& count) = 0;
+	virtual int ReqQryDepthMarketData(CRsaFtdcQryMarketDataField* pQryMarketData, CRsaFtdcDepthMarketDataField* depthMd[], int& count) = 0;
 protected:
 	~CFtdcMdApi(){};
 };
