@@ -220,7 +220,7 @@ func TestApiSpi(t *testing.T) {
 		t.Fatal("connect failed")
 	}
 
-	if err := api.ReqUserLogin(&rmd4go.CRsaFtdcReqUserLoginField{
+	if _, err := api.ReqUserLogin(&rmd4go.CRsaFtdcReqUserLoginField{
 		BrokerID: "rdrk",
 		UserID:   "test",
 		Password: "test",
@@ -232,7 +232,7 @@ func TestApiSpi(t *testing.T) {
 		t.Fatal("login failed")
 	}
 
-	if err := api.ReqBtSubMarketData(&rmd4go.CRsaFtdcBtSubMarketDataField{
+	if _, err := api.ReqBtSubMarketData(&rmd4go.CRsaFtdcBtSubMarketDataField{
 		ExchangeID:   "CFFEX",
 		InstrumentID: "IC2512",
 		BarPreces:    rmd4go.BarPrecesMinute,
@@ -321,7 +321,7 @@ func TestChannelSpi(t *testing.T) {
 		t.Fatal("not connected")
 	}
 
-	if err := api.ReqUserLogin(
+	if _, err := api.ReqUserLogin(
 		&rmd4go.CRsaFtdcReqUserLoginField{},
 	); err != nil {
 		t.Fatal(err)
@@ -331,7 +331,7 @@ func TestChannelSpi(t *testing.T) {
 		t.Fatal("login failed")
 	}
 
-	if err := api.ReqBtSubMarketData(
+	if _, err := api.ReqBtSubMarketData(
 		&rmd4go.CRsaFtdcBtSubMarketDataField{
 			ExchangeID:   "CFFEX",
 			InstrumentID: "IC2512",

@@ -30,11 +30,13 @@ typedef int (*ReqUserLogin)(
 typedef int (*ReqSubMarketData)(
 	void* this,
 	char *ppInstrumentID[],
-	int nCount);
+	int nCount,
+	int nRequestID);
 typedef int (*ReqUnSubMarketData)(
 	void* this,
 	char *ppInstrumentID[],
-	int nCount);
+	int nCount,
+	int nRequestID);
 typedef int (*ReqQryMarketData)(
 	void* this,
 	struct CRsaFtdcQryMarketDataField *pQryMarketData,
@@ -50,11 +52,13 @@ typedef int (*ReqSendBarMarketDataRead)(
 typedef int (*ReqBtSubMarketData)(
 	void* this,
 	struct CRsaFtdcBtSubMarketDataField *ppFiels[],
-	int nCount);
+	int nCount, 
+	int nRequestID);
 typedef int (*ReqBtUnSubMarketData)(
 	void* this,
 	struct CRsaFtdcBtSubMarketDataField *ppFiels[],
-	int nCount);
+	int nCount, 
+	int nRequestID);
 typedef int (*ReqSubMarketDataCompleted)(void* this);
 typedef int (*ReqSubCombMarketData)(
 	void* this,
@@ -137,13 +141,13 @@ int CallReqUserLogin(
 int CallReqSubMarketData(
 	ReqSubMarketData fn, void* this,
 	char *ppInstrumentID[],
-	int nCount
+	int nCount, int nRequestID
 );
 
 int CallReqUnSubMarketData(
 	ReqUnSubMarketData fn, void* this,
 	char *ppInstrumentID[],
-	int nCount
+	int nCount, int nRequestID
 );
 
 int CallReqQryMarketData(
@@ -167,13 +171,13 @@ int CallReqSendBarMarketDataRead(
 int CallReqBtSubMarketData(
 	ReqBtSubMarketData fn, void* this,
 	struct CRsaFtdcBtSubMarketDataField *ppFiels[],
-	int nCount
+	int nCount, int nRequstID
 );
 
 int CallReqBtUnSubMarketData(
 	ReqBtUnSubMarketData fn, void* this,
 	struct CRsaFtdcBtSubMarketDataField *ppFiels[],
-	int nCount
+	int nCount, int nRequestID
 );
 
 int CallReqSubMarketDataCompleted(

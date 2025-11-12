@@ -138,14 +138,14 @@ int CallReqUserLogin(
 int CallReqSubMarketData(
 	ReqSubMarketData fn, void* this,
 	char *ppInstrumentID[],
-	int nCount
-) { return fn(this, ppInstrumentID, nCount); }
+	int nCount, int nRequestID
+) { return fn(this, ppInstrumentID, nCount, nRequestID); }
 
 int CallReqUnSubMarketData(
 	ReqUnSubMarketData fn, void* this,
 	char *ppInstrumentID[],
-	int nCount
-) { return fn(this, ppInstrumentID, nCount); }
+	int nCount, int nRequestID
+) { return fn(this, ppInstrumentID, nCount, nRequestID); }
 
 int CallReqQryMarketData(
 	ReqQryMarketData fn, void* this,
@@ -168,14 +168,14 @@ int CallReqSendBarMarketDataRead(
 int CallReqBtSubMarketData(
 	ReqBtSubMarketData fn, void* this,
 	struct CRsaFtdcBtSubMarketDataField *ppFiels[],
-	int nCount
-) { return fn(this, ppFiels, nCount); }
+	int nCount, int nRequestID
+) { return fn(this, ppFiels, nCount, nRequestID); }
 
 int CallReqBtUnSubMarketData(
 	ReqBtUnSubMarketData fn, void* this,
 	struct CRsaFtdcBtSubMarketDataField *ppFiels[],
-	int nCount
-) { return fn(this, ppFiels, nCount); }
+	int nCount, int nRequestID
+) { return fn(this, ppFiels, nCount, nRequestID); }
 
 int CallReqSubMarketDataCompleted(
 	ReqSubMarketDataCompleted fn, void* this
