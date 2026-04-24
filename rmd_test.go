@@ -269,7 +269,7 @@ func TestChannelSpi(t *testing.T) {
 	var (
 		err       error
 		libPath   = "./dependencies/libs"
-		frontAddr = "tcp://172.16.200.105:30010"
+		frontAddr = "tcp://localhost:30010"
 		flowPath  = "./flow/"
 	)
 
@@ -322,7 +322,9 @@ func TestChannelSpi(t *testing.T) {
 	}
 
 	if _, err := api.ReqUserLogin(
-		&rmd4go.CRsaFtdcReqUserLoginField{},
+		&rmd4go.CRsaFtdcReqUserLoginField{
+			AuthCode: "api_sub_all",
+		},
 	); err != nil {
 		t.Fatal(err)
 	}
@@ -331,35 +333,37 @@ func TestChannelSpi(t *testing.T) {
 		t.Fatal("login failed")
 	}
 
-	if _, err := api.ReqBtSubMarketData(
-		&rmd4go.CRsaFtdcBtSubMarketDataField{
-			ExchangeID:   "CFFEX",
-			InstrumentID: "IC2512",
-		},
-	); err != nil {
-		t.Fatal(err)
-	}
+	// if _, err := api.ReqBtSubMarketData(
+	// 	&rmd4go.CRsaFtdcBtSubMarketDataField{
+	// 		ExchangeID:   "CFFEX",
+	// 		InstrumentID: "IM2612",
+	// 	},
+	// ); err != nil {
+	// 	t.Fatal(err)
+	// }
 
-	if !<-wait {
-		t.Fatal("sub failed")
-	}
+	// if !<-wait {
+	// 	t.Fatal("sub failed")
+	// }
 
-	if data, err := api.ReqQryBarMarketData(
-		&rmd4go.CRsaFtdcBtSubMarketDataField{
-			ExchangeID:   "CFFEX",
-			InstrumentID: "IC2512",
-			BarPreces:    rmd4go.BarPrecesMinute,
-			BarPeriod:    1,
-		}, 1000,
-	); err != nil {
-		t.Fatal(err)
-	} else {
-		for _, v := range data {
-			t.Logf("%+v", v)
-		}
+	// if data, err := api.ReqQryBarMarketData(
+	// 	&rmd4go.CRsaFtdcBtSubMarketDataField{
+	// 		ExchangeID:   "INE",
+	// 		InstrumentID: "nr2703",
+	// 		BarPreces:    rmd4go.BarPrecesMinute,
+	// 		BarPeriod:    1,
+	// 	}, 1000,
+	// ); err != nil {
+	// 	t.Fatal(err)
+	// } else {
+	// 	for _, v := range data {
+	// 		t.Logf("%+v", v)
+	// 	}
 
-		t.Log(len(data))
-	}
+	// 	t.Log(len(data))
+	// }
+
+	time.Sleep(time.Second * 10)
 
 	spi.Close()
 

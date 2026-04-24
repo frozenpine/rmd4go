@@ -73,6 +73,9 @@ func (reqLogin *CRsaFtdcReqUserLoginField) ToCStruct() *C.struct_CRsaFtdcReqUser
 		WriteCString(
 			unsafe.Pointer(&req.Password[0]),
 			reqLogin.Password, C.sizeof_TRsaFtdcPasswordType)
+		WriteCString(
+			unsafe.Pointer(&req.AuthCode[0]),
+			reqLogin.AuthCode, C.sizeof_TRsaFtdcAuthCodeType)
 	}
 
 	return &req
